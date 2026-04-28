@@ -190,7 +190,7 @@ fun PantallaMenuInicioOutlet(navController: NavHostController) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        "ÚLTIMOS HALLAZGOS",
+                        "ÚLTIMOS ARTÍCULOS",
                         color = OlivaVintage,
                         fontFamily = FontFamily.Serif,
                         fontSize = 12.sp,
@@ -307,7 +307,9 @@ private fun BarraNavegacionInferiorOutlet(
     onExplorar: () -> Unit,
     onDeseos: () -> Unit,
     onVender: () -> Unit,
-    onBolsa: () -> Unit,
+    onBolsa: (
+
+            ) -> Unit,
     onPerfil: () -> Unit,
 ) {
     Row(
