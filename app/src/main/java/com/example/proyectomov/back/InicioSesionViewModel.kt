@@ -4,15 +4,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.text.contains
+import kotlin.text.isNotBlank
 
 /**
- * Simula una espera de red al entrar (corrutinas como en clase).
+ * Valida acceso .
  */
 class InicioSesionViewModel : ViewModel() {
     var procesando by mutableStateOf(false)
@@ -22,21 +17,15 @@ class InicioSesionViewModel : ViewModel() {
         private set
 
     fun intentarEntrar(correo: String, contrasena: String, alTerminar: (exito: Boolean) -> Unit) {
-        viewModelScope.launch {
-            procesando = true
-            mensajeError = ""
-            withContext(Dispatchers.IO) {
-                delay(700)
-            }
-            procesando = false
-            val correoOk = correo.contains("@") && correo.length > 5
-            val passOk = contrasena.length >= 3
-            if (!correoOk || !passOk) {
-                mensajeError = "Correo o contraseña no válidos"
-                alTerminar(false)
-            } else {
-                alTerminar(true)
-            }
+        mensajeError = ""
+        procesando = false
+        val correoOk = correo.isNotBlank()
+        val passOk = contrasena.isNotBlank()
+        if (!correoOk || !passOk) {
+            mensajeError = "Completa correo y contraseña"
+            alTerminar(false)
+        } else {
+            alTerminar(true)
         }
     }
 }

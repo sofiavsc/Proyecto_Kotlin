@@ -1,5 +1,5 @@
 package com.example.proyectomov.front
-
+/*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-//aqui se pondra que si agregaste un articulo, los detalles de este, y si ya se vendio y asi, no se si se pueda agregar algo de recibir el dinero si ya tu articulo se vendió
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
@@ -62,4 +61,4 @@ fun PantallaAgregarArticuloDetalleOutlet(){
         }) {
 
     }
-}
+}*/

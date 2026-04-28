@@ -2,7 +2,7 @@ package com.example.proyectomov.front
 
 import androidx.compose.ui.graphics.Color
 
-/** Oliva principal (mockups). */
+/** Oliva principal. */
 val OlivaVintage = Color(0xFF4B5320)
 
 val OlivaVintageOscuro = Color(0xFF3A4218)

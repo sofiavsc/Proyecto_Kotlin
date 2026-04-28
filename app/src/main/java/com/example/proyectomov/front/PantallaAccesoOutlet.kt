@@ -45,12 +45,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyectomov.back.InicioSesionViewModel
-import kotlin.text.isNotBlank
 
 @Composable
 fun PantallaAccesoOutlet(
     viewModel: InicioSesionViewModel,
     alEntrarOk: () -> Unit,
+    onVolver: () -> Unit,
 ) {
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
@@ -69,7 +69,7 @@ fun PantallaAccesoOutlet(
                 .padding(horizontal = 4.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = { }) {
+            IconButton(onClick = onVolver) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
             }
             Text(
@@ -199,7 +199,6 @@ fun PantallaAccesoOutlet(
                         if (ok) alEntrarOk()
                     }
                 },
-                enabled = !viewModel.procesando,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -207,7 +206,7 @@ fun PantallaAccesoOutlet(
                 shape = RoundedCornerShape(2.dp),
             ) {
                 Text(
-                    text = if (viewModel.procesando) "…" else "ENTER",
+                    text = "ENTER",
                     color = Color.White,
                     fontFamily = FontFamily.Serif,
                     fontWeight = FontWeight.Bold,

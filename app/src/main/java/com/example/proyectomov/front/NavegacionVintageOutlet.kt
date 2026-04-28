@@ -17,7 +17,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 object RutaAccesoOutlet
 
-/** Menú principal (pantalla tipo imagen 3). */
+@Serializable
+object RutaBienvenidaOutlet
+
+@Serializable
+object RutaRegistroOutlet
+
+/** Menú principal (pantalla imagen 3). */
 @Serializable
 object RutaMenuInicioOutlet
 
@@ -35,14 +41,30 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = RutaAccesoOutlet,
+        startDestination = RutaBienvenidaOutlet,
         modifier = Modifier.padding(innerPadding),
     ) {
+        composable<RutaBienvenidaOutlet> {
+            PantallaBienvenidaOutlet(
+                onIniciarSesion = { navController.navigate(RutaAccesoOutlet) },
+                onRegistrarse = { navController.navigate(RutaRegistroOutlet) },
+            )
+        }
         composable<RutaAccesoOutlet> {
             val vm = remember { InicioSesionViewModel() }
             PantallaAccesoOutlet(
                 viewModel = vm,
                 alEntrarOk = {
+                    navController.navigate(RutaMenuInicioOutlet) {
+                    }
+                },
+                onVolver = { navController.popBackStack() },
+            )
+        }
+        composable<RutaRegistroOutlet> {
+            PantallaRegistroOutlet(
+                onVolver = { navController.popBackStack() },
+                onRegistroExitoso = {
                     navController.navigate(RutaMenuInicioOutlet) {
                     }
                 },
