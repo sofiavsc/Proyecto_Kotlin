@@ -16,14 +16,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.R
 
 @Composable
 fun PantallaBienvenidaOutlet(
+
     onIniciarSesion: () -> Unit,
     onRegistrarse: () -> Unit,
 ) {
@@ -59,6 +62,7 @@ fun PantallaBienvenidaOutlet(
         ) {
             Text(
                 text = "INICIAR SESION",
+                fontFamily = ,
                 color = Color.White,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Bold,
