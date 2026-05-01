@@ -2,6 +2,7 @@ package com.example.proyectomov.front
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -30,21 +32,42 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.proyectomov.back.RegistroViewModel
+import com.example.proyectomov.ui.theme.ProyectoMovTheme
 
 @Composable
 fun PantallaRegistroOutlet(
+    viewModel: RegistroViewModel,
     onVolver: () -> Unit = {},
     onRegistroExitoso: () -> Unit = {},
 ) {
-    var nombre by rememberSaveable { mutableStateOf("") }
+    PantallaRegistroOutletContenido(
+        procesando = viewModel.procesando,
+        mensajeError = viewModel.mensajeError,
+        onRegistrar = { u, c, p, cp, cb ->
+            viewModel.registrar(u, c, p, cp, cb)
+        },
+        onVolver = onVolver,
+        onRegistroExitoso = onRegistroExitoso,
+    )
+}
+
+@Composable
+private fun PantallaRegistroOutletContenido(
+    procesando: Boolean,
+    mensajeError: String,
+    onRegistrar: (String, String, String, String, (Boolean) -> Unit) -> Unit,
+    onVolver: () -> Unit,
+    onRegistroExitoso: () -> Unit,
+) {
+    var username by rememberSaveable { mutableStateOf("") }
     var correo by rememberSaveable { mutableStateOf("") }
     var contrasena by rememberSaveable { mutableStateOf("") }
     var confirmarContrasena by rememberSaveable { mutableStateOf("") }
-    var mensajeError by rememberSaveable { mutableStateOf("") }
 
     val scroll = rememberScrollState()
 
@@ -64,9 +87,7 @@ fun PantallaRegistroOutlet(
             }
             Text(
                 text = "Registro",
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(start = 8.dp),
             )
         }
@@ -75,15 +96,15 @@ fun PantallaRegistroOutlet(
         Text(
             text = "Crea tu cuenta para comprar y vender piezas vintage.",
             color = GrisSecundario,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text("NOMBRE", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+        Text("USERNAME", style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
-            value = nombre,
-            onValueChange = { nombre = it },
+            value = username,
+            onValueChange = { username = it },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(6.dp),
@@ -95,10 +116,15 @@ fun PantallaRegistroOutlet(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("EMAIL", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+        Text("EMAIL", style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = correo,
             onValueChange = { correo = it },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                autoCorrectEnabled = false,
+                imeAction = ImeAction.Next,
+            ),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(6.dp),
@@ -110,7 +136,7 @@ fun PantallaRegistroOutlet(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("CONTRASENA", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+        Text("CONTRASENA", style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = contrasena,
             onValueChange = { contrasena = it },
@@ -125,7 +151,7 @@ fun PantallaRegistroOutlet(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("CONFIRMAR CONTRASENA", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+        Text("CONFIRMAR CONTRASENA", style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = confirmarContrasena,
             onValueChange = { confirmarContrasena = it },
@@ -144,27 +170,18 @@ fun PantallaRegistroOutlet(
             Text(
                 text = mensajeError,
                 color = Color.Red,
-                fontSize = 13.sp,
+                style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
 
         Button(
             onClick = {
-                val correoValido = correo.contains("@") && correo.length > 5
-                val passValida = contrasena.length >= 3
-                val passIguales = contrasena == confirmarContrasena
-
-                mensajeError = when {
-                    nombre.isBlank() -> "Escribe tu nombre."
-                    !correoValido -> "Correo no valido."
-                    !passValida -> "La contrasena debe tener al menos 3 caracteres."
-                    !passIguales -> "Las contrasenas no coinciden."
-                    else -> ""
+                onRegistrar(username, correo, contrasena, confirmarContrasena) { ok ->
+                    if (ok) onRegistroExitoso()
                 }
-
-                if (mensajeError.isBlank()) onRegistroExitoso()
             },
+            enabled = !procesando,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
@@ -172,10 +189,9 @@ fun PantallaRegistroOutlet(
             shape = RoundedCornerShape(6.dp),
         ) {
             Text(
-                text = "CREAR CUENTA",
+                text = if (procesando) "REGISTRANDO..." else "CREAR CUENTA",
                 color = Color.White,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
 
@@ -185,13 +201,27 @@ fun PantallaRegistroOutlet(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
         ) {
-            Text("Ya tienes cuenta? ")
+            Text("Ya tienes cuenta? ", style = MaterialTheme.typography.bodyMedium)
             Text(
                 text = "Inicia sesion",
                 color = OlivaVintage,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.clickable { onVolver() },
             )
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Registro")
+@Composable
+private fun PantallaRegistroOutletPreview() {
+    ProyectoMovTheme {
+        PantallaRegistroOutletContenido(
+            procesando = false,
+            mensajeError = "",
+            onRegistrar = { _, _, _, _, cb -> cb(false) },
+            onVolver = {},
+            onRegistroExitoso = {},
+        )
     }
 }

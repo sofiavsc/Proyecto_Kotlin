@@ -36,13 +36,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,25 +53,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.proyectomov.back.ArticuloOutlet
-import com.example.proyectomov.back.CatalogoOutletMemoria
 import kotlin.collections.chunked
 import kotlin.collections.forEach
 
 @Composable
-fun PantallaMenuInicioOutlet(navController: NavHostController) {
-    val catalogo = remember { CatalogoOutletMemoria() }
-    val articulos = remember { catalogo.obtenerArticulosDemo() }
-    val marcas = remember { catalogo.marcasDestacadasDemo() }
-    val favoritos = remember { mutableStateListOf<String>() }
+fun PantallaMenuInicioOutlet(
+    navController: NavHostController,
+    articulos: List<ArticuloOutlet>,
+    marcas: List<Pair<String, Int>>,
+    favoritos: List<String>,
+    onToggleFavorito: (String) -> Unit,
+) {
     var textoBusqueda by remember { mutableStateOf("") }
 
     Scaffold(
@@ -79,8 +77,8 @@ fun PantallaMenuInicioOutlet(navController: NavHostController) {
         bottomBar = {
             BarraNavegacionInferiorOutlet(
                 onExplorar = { },
-                onDeseos = { },
-                onVender = { },
+                onDeseos = { navController.navigate(RutaFavoritosOutlet) },
+                onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
                 onBolsa = { },
                 onPerfil = { },
             )
@@ -106,10 +104,9 @@ fun PantallaMenuInicioOutlet(navController: NavHostController) {
                         text = "Vintage Outlet",
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
-                        fontFamily = FontFamily.Serif,
-                        fontStyle = FontStyle.Italic,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontStyle = FontStyle.Italic,
+                        ),
                     )
                     IconButton(onClick = { /* avance */ }) {
                         Icon(Icons.Default.Person, contentDescription = "Perfil")
@@ -153,9 +150,7 @@ fun PantallaMenuInicioOutlet(navController: NavHostController) {
                 Text(
                     text = "MARCAS DESTACADAS",
                     color = OlivaVintage,
-                    fontFamily = FontFamily.Serif,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
                 )
             }
@@ -176,7 +171,7 @@ fun PantallaMenuInicioOutlet(navController: NavHostController) {
                                 contentScale = ContentScale.Crop,
                             )
                             Spacer(modifier = Modifier.height(6.dp))
-                            Text(nombre, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text(nombre, style = MaterialTheme.typography.labelMedium)
                         }
                     }
                 }
@@ -192,13 +187,11 @@ fun PantallaMenuInicioOutlet(navController: NavHostController) {
                     Text(
                         "ÚLTIMOS ARTÍCULOS",
                         color = OlivaVintage,
-                        fontFamily = FontFamily.Serif,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.labelMedium,
                     )
                     Text(
                         "VER TODO",
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         textDecoration = TextDecoration.Underline,
                         modifier = Modifier.clickable { /* avance */ },
                     )
@@ -216,7 +209,7 @@ fun PantallaMenuInicioOutlet(navController: NavHostController) {
                             articulo = art,
                             esFavorito = favoritos.contains(art.idMostrar),
                             onToggleFavorito = {
-                                if (favoritos.contains(art.idMostrar)) favoritos.remove(art.idMostrar) else favoritos.add(art.idMostrar)
+                                onToggleFavorito(art.idMostrar)
                             },
                             onClickFoto = {
                                 navController.navigate(
@@ -237,6 +230,128 @@ fun PantallaMenuInicioOutlet(navController: NavHostController) {
                 }
             }
             item { Spacer(modifier = Modifier.height(16.dp)) }
+        }
+    }
+}
+
+@Composable
+fun PantallaFavoritosOutlet(
+    navController: NavHostController,
+    articulos: List<ArticuloOutlet>,
+    favoritos: List<String>,
+) {
+    val articulosFavoritos = remember(articulos, favoritos) {
+        articulos.filter { it.idMostrar in favoritos }
+    }
+
+    Scaffold(
+        containerColor = Color.White,
+        bottomBar = {
+            BarraNavegacionInferiorOutlet(
+                onExplorar = { navController.popBackStack() },
+                onDeseos = { },
+                onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
+                onBolsa = { },
+                onPerfil = { },
+            )
+        },
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .background(Color.White),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            item {
+                Text(
+                    text = "ARTÍCULOS FAVORITOS",
+                    color = OlivaVintage,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+
+            if (articulosFavoritos.isEmpty()) {
+                item {
+                    Text(
+                        text = "Aún no tienes artículos en favoritos.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = GrisSecundario,
+                    )
+                }
+            } else {
+                items(articulosFavoritos, key = { it.idMostrar }) { art ->
+                    TarjetaFavoritoOutlet(
+                        articulo = art,
+                        onClick = {
+                            navController.navigate(
+                                RutaDetalleArticulo(
+                                    titulo = art.titulo,
+                                    precioPesosEntero = art.precioPesosEntero,
+                                    descripcion = art.descripcion,
+                                    imagenResId = art.imagenResId,
+                                ),
+                            )
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TarjetaFavoritoOutlet(
+    articulo: ArticuloOutlet,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Image(
+                painter = painterResource(articulo.imagenResId),
+                contentDescription = articulo.titulo,
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(FondoCrema),
+                contentScale = ContentScale.Crop,
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = articulo.titulo,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 2,
+                )
+                Text(
+                    text = "ID: ${articulo.idMostrar}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = GrisSecundario,
+                )
+                Text(
+                    text = "$${articulo.precioPesosEntero}.00",
+                    color = OlivaVintage,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.Favorite,
+                contentDescription = "Favorito",
+                tint = OlivaVintage,
+            )
         }
     }
 }
@@ -284,19 +399,20 @@ private fun TarjetaPolaroidOutlet(
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text("ID: ${articulo.idMostrar}", fontSize = 10.sp, color = GrisSecundario)
+            Text(
+                "ID: ${articulo.idMostrar}",
+                style = MaterialTheme.typography.labelSmall,
+                color = GrisSecundario,
+            )
             Text(
                 articulo.titulo,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.titleMedium,
                 maxLines = 2,
             )
             Text(
                 "$" + articulo.precioPesosEntero + ".00",
                 color = OlivaVintage,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.titleLarge,
             )
         }
     }
@@ -359,6 +475,10 @@ private fun ItemBarraInferior(
             Icon(icono, contentDescription = etiqueta, tint = color, modifier = Modifier.size(28.dp))
         }
         Spacer(modifier = Modifier.height(2.dp))
-        Text(etiqueta, fontSize = 9.sp, color = color, fontFamily = FontFamily.Serif)
+        Text(
+            etiqueta,
+            style = MaterialTheme.typography.labelSmall,
+            color = color,
+        )
     }
 }

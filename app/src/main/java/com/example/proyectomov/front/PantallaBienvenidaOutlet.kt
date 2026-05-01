@@ -1,5 +1,6 @@
 package com.example.proyectomov.front
 
+import android.graphics.Paint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,18 +11,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 @Composable
 fun PantallaBienvenidaOutlet(
@@ -38,17 +38,17 @@ fun PantallaBienvenidaOutlet(
     ) {
         Text(
             text = "Vintage Outlet",
-            fontFamily = FontFamily.Serif,
-            fontWeight = FontWeight.Bold,
-            fontStyle = FontStyle.Italic,
-            fontSize = 36.sp,
+            style = MaterialTheme.typography.displayLarge.copy(
+                fontStyle = FontStyle.Italic,
+            ),
+            textAlign = TextAlign.Center,
             color = OlivaVintage,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Compra y vende piezas con historia",
             color = GrisSecundario,
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.bodyMedium,
         )
         Spacer(modifier = Modifier.height(40.dp))
         Button(
@@ -61,8 +61,7 @@ fun PantallaBienvenidaOutlet(
             Text(
                 text = "INICIAR SESION",
                 color = Color.White,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
@@ -75,8 +74,7 @@ fun PantallaBienvenidaOutlet(
         ) {
             Text(
                 text = "REGISTRARSE",
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }

@@ -24,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -37,20 +38,39 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.proyectomov.back.InicioSesionViewModel
+import com.example.proyectomov.ui.theme.ProyectoMovTheme
 
 @Composable
 fun PantallaAccesoOutlet(
     viewModel: InicioSesionViewModel,
     alEntrarOk: () -> Unit,
     onVolver: () -> Unit,
+    onIrARegistro: () -> Unit = {},
+) {
+    PantallaAccesoOutletContenido(
+        procesando = viewModel.procesando,
+        mensajeError = viewModel.mensajeError,
+        onIntentarEntrar = { c, p, cb -> viewModel.intentarEntrar(c, p, cb) },
+        alEntrarOk = alEntrarOk,
+        onVolver = onVolver,
+        onIrARegistro = onIrARegistro,
+    )
+}
+
+@Composable
+private fun PantallaAccesoOutletContenido(
+    procesando: Boolean,
+    mensajeError: String,
+    onIntentarEntrar: (String, String, (Boolean) -> Unit) -> Unit,
+    alEntrarOk: () -> Unit,
+    onVolver: () -> Unit,
+    onIrARegistro: () -> Unit,
 ) {
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
@@ -75,9 +95,7 @@ fun PantallaAccesoOutlet(
             Text(
                 text = "Sign In",
                 modifier = Modifier.weight(1f),
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
             )
             Spacer(modifier = Modifier.size(48.dp))
         }
@@ -105,9 +123,7 @@ fun PantallaAccesoOutlet(
                 Text(
                     text = "VINTAGE OUTLET",
                     color = Color.White,
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.titleLarge,
                 )
             }
         }
@@ -115,25 +131,22 @@ fun PantallaAccesoOutlet(
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             Text(
                 text = "Rediscover Style",
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                fontSize = 26.sp,
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontStyle = FontStyle.Italic,
+                ),
                 color = Color.Black,
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = "Log in to browse our curated second-hand archives.",
-                fontFamily = FontFamily.Serif,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = GrisSecundario,
             )
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
                 text = "EMAIL ADDRESS",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
+                style = MaterialTheme.typography.labelMedium,
             )
             OutlinedTextField(
                 value = correo,
@@ -156,14 +169,12 @@ fun PantallaAccesoOutlet(
             ) {
                 Text(
                     text = "PASSWORD",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif,
+                    style = MaterialTheme.typography.labelMedium,
                 )
                 Text(
                     text = "Forgot?",
                     color = OlivaVintage,
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.padding(end = 4.dp),
                 )
             }
@@ -187,18 +198,23 @@ fun PantallaAccesoOutlet(
                     unfocusedBorderColor = GrisBordeCampo,
                 ),
             )
-            if (viewModel.mensajeError.isNotBlank()) {
+            if (mensajeError.isNotBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = viewModel.mensajeError, color = Color.Red, fontSize = 13.sp)
+                Text(
+                    text = mensajeError,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             }
             Spacer(modifier = Modifier.height(18.dp))
 
             Button(
                 onClick = {
-                    viewModel.intentarEntrar(correo, contrasena) { ok ->
+                    onIntentarEntrar(correo, contrasena) { ok ->
                         if (ok) alEntrarOk()
                     }
                 },
+                enabled = !procesando,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -206,11 +222,9 @@ fun PantallaAccesoOutlet(
                 shape = RoundedCornerShape(2.dp),
             ) {
                 Text(
-                    text = "ENTER",
+                    text = if (procesando) "VALIDANDO..." else "ENTER",
                     color = Color.White,
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
             Spacer(modifier = Modifier.height(22.dp))
@@ -222,9 +236,10 @@ fun PantallaAccesoOutlet(
                 HorizontalDivider(modifier = Modifier.weight(1f), color = GrisBordeCampo)
                 Text(
                     text = "  OR CONNECT WITH  ",
-                    fontSize = 10.sp,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontStyle = FontStyle.Italic,
+                    ),
                     color = GrisSecundario,
-                    fontStyle = FontStyle.Italic,
                 )
                 HorizontalDivider(modifier = Modifier.weight(1f), color = GrisBordeCampo)
             }
@@ -238,30 +253,71 @@ fun PantallaAccesoOutlet(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(4.dp),
                 ) {
-                    Text("GOOGLE", fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text(
+                        "GOOGLE",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.labelLarge,
+                    )
                 }
                 OutlinedButton(
                     onClick = { },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(4.dp),
                 ) {
-                    Text("APPLE", fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text(
+                        "APPLE",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.labelLarge,
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(28.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                Text("Don't have an account? ", fontSize = 14.sp)
+                Text(
+                    "Don't have an account? ",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
                 Text(
                     text = "Register Here",
                     color = OlivaVintage,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif,
-                    fontSize = 14.sp,
-                    modifier = Modifier.clickable { /* avance */ },
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontStyle = FontStyle.Italic,
+                    ),
+                    modifier = Modifier.clickable { onIrARegistro() },
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Acceso · login")
+@Composable
+private fun PantallaAccesoOutletPreviewNormal() {
+    ProyectoMovTheme {
+        PantallaAccesoOutletContenido(
+            procesando = false,
+            mensajeError = "",
+            onIntentarEntrar = { _, _, cb -> cb(false) },
+            alEntrarOk = {},
+            onVolver = {},
+            onIrARegistro = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Acceso · error")
+@Composable
+private fun PantallaAccesoOutletPreviewError() {
+    ProyectoMovTheme {
+        PantallaAccesoOutletContenido(
+            procesando = false,
+            mensajeError = "Correo o contraseña incorrectos.",
+            onIntentarEntrar = { _, _, _ -> },
+            alEntrarOk = {},
+            onVolver = {},
+            onIrARegistro = {},
+        )
     }
 }

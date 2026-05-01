@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -26,10 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 @Composable
 fun PantallaAgregarArticuloOutlet(
@@ -57,9 +55,7 @@ fun PantallaAgregarArticuloOutlet(
 
         Text(
             text = "Publicar Articulo",
-            fontFamily = FontFamily.Serif,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
+            style = MaterialTheme.typography.headlineMedium,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -67,12 +63,12 @@ fun PantallaAgregarArticuloOutlet(
         Text(
             text = "Ingresa la informacion principal de tu prenda para crear la publicacion.",
             color = GrisSecundario,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
         )
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        Text("TITULO", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+        Text("TITULO", style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = titulo,
             onValueChange = { titulo = it },
@@ -88,7 +84,7 @@ fun PantallaAgregarArticuloOutlet(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("CATEGORIA", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+        Text("CATEGORIA", style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = categoria,
             onValueChange = { categoria = it },
@@ -104,7 +100,7 @@ fun PantallaAgregarArticuloOutlet(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("PRECIO (MXN)", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+        Text("PRECIO (MXN)", style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = precio,
             onValueChange = { precio = it.filter { ch -> ch.isDigit() } },
@@ -120,7 +116,7 @@ fun PantallaAgregarArticuloOutlet(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("DESCRIPCION", fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Serif)
+        Text("DESCRIPCION", style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = descripcion,
             onValueChange = { descripcion = it },
@@ -141,7 +137,7 @@ fun PantallaAgregarArticuloOutlet(
             Text(
                 text = mensajeError,
                 color = Color.Red,
-                fontSize = 13.sp,
+                style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -166,8 +162,7 @@ fun PantallaAgregarArticuloOutlet(
             Text(
                 text = "CONTINUAR",
                 color = Color.White,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }
