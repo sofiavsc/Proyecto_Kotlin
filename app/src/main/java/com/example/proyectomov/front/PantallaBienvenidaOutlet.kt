@@ -1,6 +1,5 @@
 package com.example.proyectomov.front
 
-import android.graphics.Paint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,9 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.proyectomov.back.FondoCrema
+import com.example.proyectomov.back.GrisSecundario
+import com.example.proyectomov.back.OlivaVintage
 
 @Composable
 fun PantallaBienvenidaOutlet(

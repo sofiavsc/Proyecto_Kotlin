@@ -5,7 +5,7 @@ package com.example.proyectomov.back
  */
 data class ArticuloOutlet(
     val idMostrar: String,
-    val imagenResId: Int,
+    val imagenUrl: String,
     val titulo: String,
     val precioPesosEntero: Int,
     val categoria: String,

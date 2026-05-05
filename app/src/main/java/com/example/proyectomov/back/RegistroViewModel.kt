@@ -10,9 +10,8 @@ import kotlinx.coroutines.launch
 
 class RegistroViewModel(
     application: Application,
-    private val cuentasRepository: UsuarioCuentasRepository =
-        UsuarioCuentasRepository(application.applicationContext),
 ) : AndroidViewModel(application) {
+    private val cuentasRepository = UsuarioCuentasRepository(application.applicationContext)
     var procesando by mutableStateOf(false)
         private set
 

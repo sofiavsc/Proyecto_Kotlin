@@ -43,7 +43,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.proyectomov.back.GrisBordeCampo
+import com.example.proyectomov.back.GrisSecundario
 import com.example.proyectomov.back.InicioSesionViewModel
+import com.example.proyectomov.back.OlivaVintage
 import com.example.proyectomov.ui.theme.ProyectoMovTheme
 
 @Composable

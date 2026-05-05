@@ -1,7 +1,6 @@
 package com.example.proyectomov.back
 
 import com.example.proyectomov.R
-import kotlin.to
 
 class CatalogoOutletMemoria {
 
@@ -11,7 +10,7 @@ class CatalogoOutletMemoria {
         lista.add(
             ArticuloOutlet(
                 idMostrar = "001",
-                imagenResId = img,
+                imagenUrl = "",
                 titulo = "BOMBER CUERO 80S",
                 precioPesosEntero = 85,
                 categoria = "Chaquetas",
@@ -22,7 +21,7 @@ class CatalogoOutletMemoria {
         lista.add(
             ArticuloOutlet(
                 idMostrar = "002",
-                imagenResId = img,
+                imagenUrl = "",
                 titulo = "DENIM LEVI'S 90S",
                 precioPesosEntero = 72,
                 categoria = "Denim",
@@ -33,7 +32,7 @@ class CatalogoOutletMemoria {
         lista.add(
             ArticuloOutlet(
                 idMostrar = "003",
-                imagenResId = img,
+                imagenUrl = "",
                 titulo = "TENIS RETRO BLANCOS",
                 precioPesosEntero = 55,
                 categoria = "Calzado",
@@ -44,7 +43,7 @@ class CatalogoOutletMemoria {
         lista.add(
             ArticuloOutlet(
                 idMostrar = "004",
-                imagenResId = img,
+                imagenUrl = "",
                 titulo = "CHAQUETA AVIADOR 1970",
                 precioPesosEntero = 125,
                 categoria = "Chaquetas",

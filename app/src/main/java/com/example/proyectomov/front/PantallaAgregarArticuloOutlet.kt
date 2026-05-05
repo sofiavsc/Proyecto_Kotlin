@@ -28,6 +28,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.proyectomov.back.GrisBordeCampo
+import com.example.proyectomov.back.GrisSecundario
+import com.example.proyectomov.back.OlivaVintage
 
 @Composable
 fun PantallaAgregarArticuloOutlet(

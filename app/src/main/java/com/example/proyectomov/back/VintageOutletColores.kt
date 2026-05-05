@@ -1,4 +1,4 @@
-package com.example.proyectomov.front
+package com.example.proyectomov.back
 
 import androidx.compose.ui.graphics.Color
 

@@ -1,9 +1,9 @@
 package com.example.proyectomov.front
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,6 +59,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.proyectomov.back.ArticuloOutlet
+import com.example.proyectomov.back.FondoCrema
+import com.example.proyectomov.back.GrisBordeCampo
+import com.example.proyectomov.back.GrisSecundario
+import com.example.proyectomov.back.OlivaVintage
+import com.example.proyectomov.back.ProductoImagenConShimmerOutlet
 import kotlin.collections.chunked
 import kotlin.collections.forEach
 
@@ -217,7 +222,7 @@ fun PantallaMenuInicioOutlet(
                                         titulo = art.titulo,
                                         precioPesosEntero = art.precioPesosEntero,
                                         descripcion = art.descripcion,
-                                        imagenResId = art.imagenResId,
+                                        imagenUrl = art.imagenUrl,
                                     ),
                                 )
                             },
@@ -290,7 +295,7 @@ fun PantallaFavoritosOutlet(
                                     titulo = art.titulo,
                                     precioPesosEntero = art.precioPesosEntero,
                                     descripcion = art.descripcion,
-                                    imagenResId = art.imagenResId,
+                                    imagenUrl = art.imagenUrl,
                                 ),
                             )
                         },
@@ -321,8 +326,8 @@ private fun TarjetaFavoritoOutlet(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Image(
-                painter = painterResource(articulo.imagenResId),
+            ProductoImagenConShimmerOutlet(
+                imagenUrl = articulo.imagenUrl,
                 contentDescription = articulo.titulo,
                 modifier = Modifier
                     .size(72.dp)
@@ -379,8 +384,8 @@ private fun TarjetaPolaroidOutlet(
                     .background(FondoCrema)
                     .clip(RoundedCornerShape(2.dp)),
             ) {
-                Image(
-                    painter = painterResource(articulo.imagenResId),
+                ProductoImagenConShimmerOutlet(
+                    imagenUrl = articulo.imagenUrl,
                     contentDescription = articulo.titulo,
                     modifier = Modifier
                         .fillMaxSize()

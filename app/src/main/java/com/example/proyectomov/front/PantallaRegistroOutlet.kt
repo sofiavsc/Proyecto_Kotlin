@@ -36,6 +36,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.proyectomov.back.GrisBordeCampo
+import com.example.proyectomov.back.GrisSecundario
+import com.example.proyectomov.back.OlivaVintage
 import com.example.proyectomov.back.RegistroViewModel
 import com.example.proyectomov.ui.theme.ProyectoMovTheme
 

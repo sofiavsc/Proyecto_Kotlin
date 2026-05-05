@@ -1,6 +1,5 @@
 package com.example.proyectomov.back
 
-import com.example.proyectomov.R
 import com.example.proyectomov.back.remote.FakeStoreApiService
 import com.example.proyectomov.back.remote.ProductDto
 import com.example.proyectomov.back.remote.ProductUpsertDto
@@ -70,7 +69,7 @@ class ProductosRepository(
 private fun ProductDto.toArticuloOutlet(): ArticuloOutlet {
     return ArticuloOutlet(
         idMostrar = id.toString().padStart(3, '0'),
-        imagenResId = R.drawable.ic_launcher_foreground,
+        imagenUrl = image,
         titulo = title,
         precioPesosEntero = price.toInt(),
         categoria = category,

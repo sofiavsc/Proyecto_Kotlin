@@ -1,5 +1,6 @@
 package com.example.proyectomov.front
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -48,7 +50,7 @@ data class RutaDetalleArticulo(
     val titulo: String,
     val precioPesosEntero: Int,
     val descripcion: String,
-    val imagenResId: Int,
+    val imagenUrl: String,
 )
 
 @Composable
@@ -85,6 +87,7 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
         catalogoMemoria.marcasDestacadasDemo()
     }
     val favoritos = remember { mutableStateListOf<String>() }
+    val contexto = LocalContext.current
 
     NavHost(
         navController = navController,
@@ -115,7 +118,10 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
                 viewModel = vmRegistro,
                 onVolver = { navController.popBackStack() },
                 onRegistroExitoso = {
-                    navController.navigate(RutaMenuInicioOutlet) {
+                    Toast.makeText(contexto, "registro exitoso", Toast.LENGTH_SHORT).show()
+                    navController.navigate(RutaAccesoOutlet) {
+                        popUpTo(RutaBienvenidaOutlet) { inclusive = false }
+                        launchSingleTop = true
                     }
                 },
             )

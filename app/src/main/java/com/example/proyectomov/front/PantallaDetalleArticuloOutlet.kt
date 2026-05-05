@@ -1,6 +1,5 @@
 package com.example.proyectomov.front
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,10 +38,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.proyectomov.back.GrisSecundario
+import com.example.proyectomov.back.OlivaVintage
+import com.example.proyectomov.back.ProductoImagenConShimmerOutlet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,8 +128,8 @@ fun PantallaDetalleArticuloOutlet(
                     .background(Color(0xFF2E2E2E)),
                 contentAlignment = Alignment.Center,
             ) {
-                Image(
-                    painter = painterResource(datos.imagenResId),
+                ProductoImagenConShimmerOutlet(
+                    imagenUrl = datos.imagenUrl,
                     contentDescription = datos.titulo,
                     modifier = Modifier
                         .fillMaxWidth()
