@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -37,7 +38,11 @@ import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -72,12 +77,21 @@ import com.example.proyectomov.back.FondoCrema
 import com.example.proyectomov.back.GrisBordeCampo
 import com.example.proyectomov.back.GrisSecundario
 import com.example.proyectomov.back.OlivaVintage
+import com.example.proyectomov.back.OlivaVintageOscuro
 import com.example.proyectomov.back.ProductoImagenConShimmerOutlet
 import java.util.Locale
 import kotlin.collections.chunked
 import kotlin.collections.forEach
 
 private const val ARTICULOS_INICIO_MAX = 10
+
+private enum class TabBarraOutlet {
+    Explorar,
+    Deseos,
+    Vender,
+    Bolsa,
+    Perfil,
+}
 
 private inline fun <reified T : Any> navegarTabInferior(
     navController: NavHostController,
@@ -108,6 +122,16 @@ private fun articulosFiltradosBusqueda(
     }
 }
 
+private fun articulosFiltradosCategorias(
+    articulos: List<ArticuloOutlet>,
+    categoriasSeleccionadas: Set<String>,
+): List<ArticuloOutlet> {
+    if (categoriasSeleccionadas.isEmpty()) return articulos
+    return articulos.filter { art ->
+        categoriasSeleccionadas.any { sel -> art.categoria.equals(sel, ignoreCase = true) }
+    }
+}
+
 /** Misma convención que [com.example.proyectomov.back.ProductosRepository]: id api → idMostrar con ceros. */
 private fun articuloPorProductId(articulos: List<ArticuloOutlet>, productId: Int): ArticuloOutlet? {
     val idMostrar = productId.toString().padStart(3, '0')
@@ -125,13 +149,30 @@ fun PantallaMenuInicioOutlet(
     onIrCarrito: () -> Unit,
 ) {
     var textoBusqueda by remember { mutableStateOf("") }
+    var categoriasSeleccionadas by remember { mutableStateOf(setOf<String>()) }
+    var mostrarFiltroCategorias by remember { mutableStateOf(false) }
     val hayBusquedaActiva = textoBusqueda.trim().isNotEmpty()
-    val articulosInicio = remember(articulos, textoBusqueda) {
+    val hayFiltroCategoriaActivo = categoriasSeleccionadas.isNotEmpty()
+    val locale = Locale.getDefault()
+    val todasLasCategorias = remember(articulos) {
+        articulos
+            .map { it.categoria.trim() }
+            .filter { it.isNotEmpty() }
+            .distinctBy { it.lowercase(locale) }
+            .sortedBy { it.lowercase(locale) }
+    }
+    val articulosLista = remember(
+        articulos,
+        textoBusqueda,
+        categoriasSeleccionadas,
+    ) {
         val trimmed = textoBusqueda.trim()
-        if (trimmed.isEmpty()) {
-            articulos.take(ARTICULOS_INICIO_MAX)
+        val porBusqueda = articulosFiltradosBusqueda(articulos, trimmed)
+        val porCategoria = articulosFiltradosCategorias(porBusqueda, categoriasSeleccionadas)
+        if (trimmed.isEmpty() && categoriasSeleccionadas.isEmpty()) {
+            porCategoria.take(ARTICULOS_INICIO_MAX)
         } else {
-            articulosFiltradosBusqueda(articulos, trimmed)
+            porCategoria
         }
     }
 
@@ -139,6 +180,7 @@ fun PantallaMenuInicioOutlet(
         containerColor = Color.White,
         bottomBar = {
             BarraNavegacionInferiorOutlet(
+                tabSeleccionada = TabBarraOutlet.Explorar,
                 onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
                 onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
@@ -158,67 +200,118 @@ fun PantallaMenuInicioOutlet(
                     color = OlivaVintage,
                 )
             } else {
-                LazyColumn(
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.White),
                 ) {
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(onClick = { /* avance */ }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menú")
-                    }
-                    Text(
-                        text = "Vintage Outlet",
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontStyle = FontStyle.Italic,
-                        ),
-                    )
-                    IconButton(onClick = { /* avance */ }) {
-                        Icon(Icons.Default.Person, contentDescription = "Perfil")
-                    }
-                }
-            }
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    OutlinedTextField(
-                        value = textoBusqueda,
-                        onValueChange = { textoBusqueda = it },
-                        modifier = Modifier.weight(1f),
-                        placeholder = { Text("Buscar tesoros vintage...", color = GrisSecundario) },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                        singleLine = true,
-                        shape = RoundedCornerShape(24.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = GrisBordeCampo,
-                            unfocusedBorderColor = GrisBordeCampo,
-                        ),
-                    )
-                    Box(
+                    Row(
                         modifier = Modifier
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(OlivaVintage)
-                            .clickable { /* avance filtro */ },
-                        contentAlignment = Alignment.Center,
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(Icons.Default.FilterList, contentDescription = "Filtro", tint = Color.White)
+                        IconButton(onClick = { /* avance */ }) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menú")
+                        }
+                        Text(
+                            text = "Vintage Outlet",
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontStyle = FontStyle.Italic,
+                            ),
+                        )
+                        IconButton(onClick = { /* avance */ }) {
+                            Icon(Icons.Default.Person, contentDescription = "Perfil")
+                        }
                     }
-                }
-            }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        OutlinedTextField(
+                            value = textoBusqueda,
+                            onValueChange = { textoBusqueda = it },
+                            modifier = Modifier.weight(1f),
+                            placeholder = { Text("Buscar tesoros vintage...", color = GrisSecundario) },
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                            singleLine = true,
+                            shape = RoundedCornerShape(24.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = GrisBordeCampo,
+                                unfocusedBorderColor = GrisBordeCampo,
+                            ),
+                        )
+                        Box {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(OlivaVintage)
+                                    .clickable { mostrarFiltroCategorias = !mostrarFiltroCategorias },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(Icons.Default.FilterList, contentDescription = "Filtro", tint = Color.White)
+                            }
+                            DropdownMenu(
+                                expanded = mostrarFiltroCategorias,
+                                onDismissRequest = { mostrarFiltroCategorias = false },
+                                modifier = Modifier.heightIn(max = 320.dp),
+                            ) {
+                                if (hayFiltroCategoriaActivo) {
+                                    DropdownMenuItem(
+                                        text = { Text("Quitar filtros", color = OlivaVintage) },
+                                        onClick = {
+                                            categoriasSeleccionadas = emptySet()
+                                        },
+                                    )
+                                }
+                                if (todasLasCategorias.isEmpty()) {
+                                    DropdownMenuItem(
+                                        text = { Text("Sin categorías", color = GrisSecundario) },
+                                        onClick = { },
+                                        enabled = false,
+                                    )
+                                } else {
+                                    todasLasCategorias.forEach { categoria ->
+                                        val marcada = categoriasSeleccionadas.any {
+                                            it.equals(categoria, ignoreCase = true)
+                                        }
+                                        DropdownMenuItem(
+                                            text = { Text(categoria) },
+                                            onClick = {
+                                                categoriasSeleccionadas = if (marcada) {
+                                                    categoriasSeleccionadas.filterNot {
+                                                        it.equals(categoria, ignoreCase = true)
+                                                    }.toSet()
+                                                } else {
+                                                    categoriasSeleccionadas + categoria
+                                                }
+                                            },
+                                            trailingIcon = {
+                                                Checkbox(
+                                                    checked = marcada,
+                                                    onCheckedChange = null,
+                                                    colors = CheckboxDefaults.colors(
+                                                        checkedColor = OlivaVintage,
+                                                    ),
+                                                )
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                    ) {
             item {
                 Text(
                     text = "CATEGORÍAS",
@@ -268,15 +361,16 @@ fun PantallaMenuInicioOutlet(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        if (hayBusquedaActiva) {
-                            "RESULTADOS DE BÚSQUEDA"
-                        } else {
-                            "ÚLTIMOS ARTÍCULOS"
+                        when {
+                            hayBusquedaActiva && hayFiltroCategoriaActivo -> "RESULTADOS"
+                            hayBusquedaActiva -> "RESULTADOS DE BÚSQUEDA"
+                            hayFiltroCategoriaActivo -> "ARTÍCULOS POR CATEGORÍA"
+                            else -> "ÚLTIMOS ARTÍCULOS"
                         },
                         color = OlivaVintage,
                         style = MaterialTheme.typography.labelMedium,
                     )
-                    if (!hayBusquedaActiva) {
+                    if (!hayBusquedaActiva && !hayFiltroCategoriaActivo) {
                         Text(
                             "VER TODO",
                             style = MaterialTheme.typography.labelSmall,
@@ -289,17 +383,23 @@ fun PantallaMenuInicioOutlet(
                     }
                 }
             }
-            if (hayBusquedaActiva && articulosInicio.isEmpty()) {
+            if ((hayBusquedaActiva || hayFiltroCategoriaActivo) && articulosLista.isEmpty()) {
                 item {
                     Text(
-                        text = "No hay artículos que coincidan con tu búsqueda.",
+                        text = if (hayBusquedaActiva && hayFiltroCategoriaActivo) {
+                            "No hay artículos que coincidan con la búsqueda y las categorías."
+                        } else if (hayBusquedaActiva) {
+                            "No hay artículos que coincidan con tu búsqueda."
+                        } else {
+                            "No hay artículos en las categorías seleccionadas."
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         color = GrisSecundario,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     )
                 }
             } else {
-                items(articulosInicio.chunked(2)) { fila ->
+                items(articulosLista.chunked(2)) { fila ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -334,6 +434,7 @@ fun PantallaMenuInicioOutlet(
                 }
             }
             item { Spacer(modifier = Modifier.height(16.dp)) }
+                    }
                 }
             }
         }
@@ -369,6 +470,7 @@ fun PantallaCatalogoCompletoOutlet(
         },
         bottomBar = {
             BarraNavegacionInferiorOutlet(
+                tabSeleccionada = TabBarraOutlet.Explorar,
                 onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
                 onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
@@ -478,6 +580,7 @@ fun PantallaCatalogoPorCategoriaOutlet(
         },
         bottomBar = {
             BarraNavegacionInferiorOutlet(
+                tabSeleccionada = TabBarraOutlet.Explorar,
                 onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
                 onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
@@ -566,6 +669,7 @@ fun PantallaFavoritosOutlet(
         containerColor = Color.White,
         bottomBar = {
             BarraNavegacionInferiorOutlet(
+                tabSeleccionada = TabBarraOutlet.Deseos,
                 onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
                 onDeseos = { },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
@@ -639,6 +743,7 @@ fun PantallaCarritoOutlet(
         containerColor = Color.White,
         bottomBar = {
             BarraNavegacionInferiorOutlet(
+                tabSeleccionada = TabBarraOutlet.Bolsa,
                 onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
                 onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
@@ -909,6 +1014,7 @@ private fun TarjetaPolaroidOutlet(
 
 @Composable
 private fun BarraNavegacionInferiorOutlet(
+    tabSeleccionada: TabBarraOutlet,
     onExplorar: () -> Unit,
     onDeseos: () -> Unit,
     onVender: () -> Unit,
@@ -926,13 +1032,36 @@ private fun BarraNavegacionInferiorOutlet(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ItemBarraInferior("EXPLORAR", Icons.Default.Explore, seleccionado = true, onClick = onExplorar)
-        ItemBarraInferior("DESEOS", Icons.Default.FavoriteBorder, seleccionado = false, onClick = onDeseos)
-        ItemBarraInferior("VENDER", Icons.Default.Add, seleccionado = false, onClick = onVender)
-        ItemBarraInferior("BOLSA", Icons.Default.ShoppingBag, seleccionado = false, onClick = onBolsa)
         ItemBarraInferior(
-
-            "PERFIL", Icons.Default.Person, seleccionado = false, onClick = onPerfil)
+            "EXPLORAR",
+            Icons.Default.Explore,
+            seleccionado = tabSeleccionada == TabBarraOutlet.Explorar,
+            onClick = onExplorar,
+        )
+        ItemBarraInferior(
+            "DESEOS",
+            Icons.Default.FavoriteBorder,
+            seleccionado = tabSeleccionada == TabBarraOutlet.Deseos,
+            onClick = onDeseos,
+        )
+        ItemBarraInferior(
+            "VENDER",
+            Icons.Default.Add,
+            seleccionado = tabSeleccionada == TabBarraOutlet.Vender,
+            onClick = onVender,
+        )
+        ItemBarraInferior(
+            "BOLSA",
+            Icons.Default.ShoppingBag,
+            seleccionado = tabSeleccionada == TabBarraOutlet.Bolsa,
+            onClick = onBolsa,
+        )
+        ItemBarraInferior(
+            "PERFIL",
+            Icons.Default.Person,
+            seleccionado = tabSeleccionada == TabBarraOutlet.Perfil,
+            onClick = onPerfil,
+        )
     }
 }
 
@@ -943,26 +1072,14 @@ private fun ItemBarraInferior(
     seleccionado: Boolean,
     onClick: () -> Unit,
 ) {
-    val color = if (seleccionado) OlivaVintage else GrisSecundario
+    val color = if (seleccionado) OlivaVintageOscuro else GrisSecundario
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .width(56.dp)
             .clickable { onClick() },
     ) {
-        if (seleccionado) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(OlivaVintage.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(icono, contentDescription = etiqueta, tint = OlivaVintage)
-            }
-        } else {
-            Icon(icono, contentDescription = etiqueta, tint = color, modifier = Modifier.size(28.dp))
-        }
+        Icon(icono, contentDescription = etiqueta, tint = color, modifier = Modifier.size(28.dp))
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             etiqueta,

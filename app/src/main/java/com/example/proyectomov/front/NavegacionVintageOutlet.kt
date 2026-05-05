@@ -27,6 +27,7 @@ import com.example.proyectomov.back.InicioSesionViewModel
 import com.example.proyectomov.back.RegistroViewModel
 import com.example.proyectomov.ui.theme.ProyectoMovTheme
 import kotlinx.serialization.Serializable
+import java.util.Locale
 
 @Serializable
 object RutaAccesoOutlet
@@ -67,6 +68,25 @@ data class RutaDetalleArticulo(
     val imagenUrl: String,
 )
 
+private fun iconoParaCategoriaDestacada(categoriaFiltro: String): Int {
+    return when (categoriaFiltro.lowercase(Locale.ROOT)) {
+        "electronics" -> R.drawable.electronicos
+        "jewelery" -> R.drawable.joyeria
+        "men's clothing" -> R.drawable.ropa_hombre
+        else -> R.drawable.ic_launcher_foreground
+    }
+}
+
+private fun etiquetaCategoriaDestacada(categoriaFiltro: String): String {
+    return when (categoriaFiltro.lowercase(Locale.ROOT)) {
+        "electronics" -> "ELECTRÓNICOS"
+        "jewelery" -> "JOYERÍA"
+        "men's clothing" -> "ROPA HOMBRE"
+        "women's clothing" -> "ROPA MUJER"
+        else -> categoriaFiltro.uppercase(Locale.getDefault())
+    }
+}
+
 @Composable
 fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
     if (LocalInspectionMode.current) {
@@ -88,21 +108,20 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
     val navController = rememberNavController()
     val catalogoVm = viewModel<CatalogoOutletViewModel>()
     val articulos = catalogoVm.articulos
-    val iconCategoria = R.drawable.ic_launcher_foreground
+    val iconPorDefecto = R.drawable.ic_launcher_foreground
     val categoriasDestacadas = if (catalogoVm.categorias.isNotEmpty()) {
-        catalogoVm.categorias.take(4).map { cat ->
+        catalogoVm.categorias.take(3).map { cat ->
             CategoriaDestacadaOutlet(
-                etiqueta = cat.uppercase(),
+                etiqueta = etiquetaCategoriaDestacada(cat),
                 categoriaFiltro = cat,
-                iconoResId = iconCategoria,
+                iconoResId = iconoParaCategoriaDestacada(cat),
             )
         }
     } else {
         listOf(
-            CategoriaDestacadaOutlet("CHAQUETAS", "Chaquetas", iconCategoria),
-            CategoriaDestacadaOutlet("DENIM", "Denim", iconCategoria),
-            CategoriaDestacadaOutlet("CALZADO", "Calzado", iconCategoria),
-            CategoriaDestacadaOutlet("ACCESORIOS", "Accesorios", iconCategoria),
+            CategoriaDestacadaOutlet("CHAQUETAS", "Chaquetas", iconPorDefecto),
+            CategoriaDestacadaOutlet("DENIM", "Denim", iconPorDefecto),
+            CategoriaDestacadaOutlet("CALZADO", "Calzado", iconPorDefecto),
         )
     }
     val favoritos = remember { mutableStateListOf<String>() }
