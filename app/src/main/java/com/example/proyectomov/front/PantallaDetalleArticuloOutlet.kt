@@ -1,5 +1,7 @@
 package com.example.proyectomov.front
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,12 +22,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +45,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.proyectomov.back.CarritoViewModel
+import com.example.proyectomov.back.FondoCrema
 import com.example.proyectomov.back.GrisSecundario
 import com.example.proyectomov.back.OlivaVintage
 import com.example.proyectomov.back.ProductoImagenConShimmerOutlet
@@ -50,9 +56,15 @@ import com.example.proyectomov.back.ProductoImagenConShimmerOutlet
 fun PantallaDetalleArticuloOutlet(
     datos: RutaDetalleArticulo,
     navController: NavHostController,
+    esFavorito: Boolean,
+    onToggleFavorito: () -> Unit,
+    carritoViewModel: CarritoViewModel,
+    productIdApi: Int,
+    contexto: Context,
 ) {
     val scroll = rememberScrollState()
     val precioTexto = "$" + datos.precioPesosEntero + ".00"
+    val operando by carritoViewModel::operando
 
     Scaffold(
         containerColor = Color.White,
@@ -69,11 +81,6 @@ fun PantallaDetalleArticuloOutlet(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
                     }
                 },
-                actions = {
-                    IconButton(onClick = { /* avance */ }) {
-                        Icon(Icons.Default.Share, contentDescription = "Compartir")
-                    }
-                },
             )
         },
         bottomBar = {
@@ -86,31 +93,53 @@ fun PantallaDetalleArticuloOutlet(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Button(
-                    onClick = { /* avance carrito */ },
+                    onClick = {
+                        if (productIdApi <= 0) return@Button
+                        carritoViewModel.agregarProducto(productIdApi) { _, mensaje ->
+                            Toast.makeText(
+                                contexto,
+                                mensaje,
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
+                    },
+                    enabled = productIdApi > 0 && !operando,
                     modifier = Modifier
                         .weight(1f)
                         .height(52.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = OlivaVintage),
                     shape = RoundedCornerShape(50),
                 ) {
-                    Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color.White)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        "Añadir al Carrito",
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelLarge,
-                    )
+                    if (operando) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(22.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Añadir al Carrito",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
                 }
                 Box(
                     modifier = Modifier
                         .size(52.dp)
                         .clip(CircleShape)
                         .border(1.dp, Color.Black, CircleShape)
-                        .background(Color.White)
-                        .clickable { /* avance guardar */ },
+                        .background(if (esFavorito) OlivaVintage.copy(alpha = 0.12f) else Color.White)
+                        .clickable(onClick = onToggleFavorito),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(Icons.Outlined.BookmarkBorder, contentDescription = "Guardar", tint = Color.Black)
+                    Icon(
+                        imageVector = if (esFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Favorito",
+                        tint = if (esFavorito) OlivaVintage else GrisSecundario,
+                    )
                 }
             }
         },
@@ -125,7 +154,7 @@ fun PantallaDetalleArticuloOutlet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(280.dp)
-                    .background(Color(0xFF2E2E2E)),
+                    .background(FondoCrema),
                 contentAlignment = Alignment.Center,
             ) {
                 ProductoImagenConShimmerOutlet(

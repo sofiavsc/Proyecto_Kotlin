@@ -1,4 +1,4 @@
-package com.example.proyectomov.back.remote
+package com.example.proyectomov.back.api
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

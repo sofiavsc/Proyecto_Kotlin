@@ -1,9 +1,9 @@
 package com.example.proyectomov.back
 
-import com.example.proyectomov.back.remote.CartDto
-import com.example.proyectomov.back.remote.CartProductDto
-import com.example.proyectomov.back.remote.CartUpsertDto
-import com.example.proyectomov.back.remote.FakeStoreApiService
+import com.example.proyectomov.back.api.CartDto
+import com.example.proyectomov.back.api.CartProductDto
+import com.example.proyectomov.back.api.CartUpsertDto
+import com.example.proyectomov.back.api.FakeStoreApiService
 
 class CarritoRepository(
     private val api: FakeStoreApiService,

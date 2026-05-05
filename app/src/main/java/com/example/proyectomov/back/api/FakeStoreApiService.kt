@@ -1,4 +1,4 @@
-package com.example.proyectomov.back.remote
+package com.example.proyectomov.back.api
 
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -6,10 +6,12 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface FakeStoreApiService {
+    /** [limit] opcional: la API admite query `limit` para pedir más filas (p. ej. 100). */
     @GET("products")
-    suspend fun getProducts(): List<ProductDto>
+    suspend fun getProducts(@Query("limit") limit: Int? = null): List<ProductDto>
 
     @GET("products/{id}")
     suspend fun getProduct(@Path("id") id: Int): ProductDto

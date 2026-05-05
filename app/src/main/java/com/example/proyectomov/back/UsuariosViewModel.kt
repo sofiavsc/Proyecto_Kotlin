@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.proyectomov.back.remote.ApiClient
+import com.example.proyectomov.back.api.ApiClient
 import kotlinx.coroutines.launch
 
 class UsuariosViewModel(

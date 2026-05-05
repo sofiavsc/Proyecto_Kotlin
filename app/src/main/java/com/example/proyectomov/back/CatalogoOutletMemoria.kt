@@ -51,16 +51,17 @@ class CatalogoOutletMemoria {
                 calificacionEstrellas = 5f,
             ),
         )
-        return lista
-    }
-
-    fun marcasDestacadasDemo(): List<Pair<String, Int>> {
-        val img = R.drawable.ic_launcher_foreground
-        return listOf(
-            "DENIM" to img,
-            "SPORTS" to img,
-            "RETRO" to img,
-            "UTILITY" to img,
+        lista.add(
+            ArticuloOutlet(
+                idMostrar = "005",
+                imagenUrl = "",
+                titulo = "CINTURÓN CUERO EDITION",
+                precioPesosEntero = 28,
+                categoria = "Accesorios",
+                descripcion = "Cuero genuino, hebilla metálica.",
+                calificacionEstrellas = 4f,
+            ),
         )
+        return lista
     }
 }

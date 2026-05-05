@@ -1,4 +1,4 @@
-package com.example.proyectomov.back.remote
+package com.example.proyectomov.back.api
 
 data class ProductDto(
     val id: Int,
@@ -6,7 +6,7 @@ data class ProductDto(
     val price: Double,
     val description: String,
     val category: String,
-    val image: String,
+    val image: String? = null,
     val rating: RatingDto? = null,
 )
 

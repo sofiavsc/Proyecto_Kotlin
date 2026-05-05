@@ -24,16 +24,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +47,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,42 +65,104 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.proyectomov.back.ArticuloOutlet
+import com.example.proyectomov.back.CarritoViewModel
+import com.example.proyectomov.back.CategoriaDestacadaOutlet
+import com.example.proyectomov.back.ItemCarritoOutlet
 import com.example.proyectomov.back.FondoCrema
 import com.example.proyectomov.back.GrisBordeCampo
 import com.example.proyectomov.back.GrisSecundario
 import com.example.proyectomov.back.OlivaVintage
 import com.example.proyectomov.back.ProductoImagenConShimmerOutlet
+import java.util.Locale
 import kotlin.collections.chunked
 import kotlin.collections.forEach
+
+private const val ARTICULOS_INICIO_MAX = 10
+
+private inline fun <reified T : Any> navegarTabInferior(
+    navController: NavHostController,
+    ruta: T,
+) {
+    navController.navigate(ruta) {
+        launchSingleTop = true
+        restoreState = true
+        popUpTo(RutaMenuInicioOutlet) {
+            saveState = true
+        }
+    }
+}
+
+/**
+ * Cada palabra debe aparecer en título o categoría (sin distinguir mayúsculas).
+ */
+private fun articulosFiltradosBusqueda(
+    articulos: List<ArticuloOutlet>,
+    consultaTrimada: String,
+): List<ArticuloOutlet> {
+    val palabras = consultaTrimada.split("\\s+".toRegex()).filter { it.isNotEmpty() }
+    if (palabras.isEmpty()) return articulos
+    val locale = Locale.getDefault()
+    return articulos.filter { art ->
+        val textoTituloCategoria = "${art.titulo} ${art.categoria}".lowercase(locale)
+        palabras.all { tok -> textoTituloCategoria.contains(tok.lowercase(locale)) }
+    }
+}
+
+/** Misma convención que [com.example.proyectomov.back.ProductosRepository]: id api → idMostrar con ceros. */
+private fun articuloPorProductId(articulos: List<ArticuloOutlet>, productId: Int): ArticuloOutlet? {
+    val idMostrar = productId.toString().padStart(3, '0')
+    return articulos.find { it.idMostrar == idMostrar }
+}
 
 @Composable
 fun PantallaMenuInicioOutlet(
     navController: NavHostController,
     articulos: List<ArticuloOutlet>,
-    marcas: List<Pair<String, Int>>,
+    categoriasDestacadas: List<CategoriaDestacadaOutlet>,
     favoritos: List<String>,
+    cargandoCatalogo: Boolean = false,
     onToggleFavorito: (String) -> Unit,
+    onIrCarrito: () -> Unit,
 ) {
     var textoBusqueda by remember { mutableStateOf("") }
+    val hayBusquedaActiva = textoBusqueda.trim().isNotEmpty()
+    val articulosInicio = remember(articulos, textoBusqueda) {
+        val trimmed = textoBusqueda.trim()
+        if (trimmed.isEmpty()) {
+            articulos.take(ARTICULOS_INICIO_MAX)
+        } else {
+            articulosFiltradosBusqueda(articulos, trimmed)
+        }
+    }
 
     Scaffold(
         containerColor = Color.White,
         bottomBar = {
             BarraNavegacionInferiorOutlet(
-                onExplorar = { },
-                onDeseos = { navController.navigate(RutaFavoritosOutlet) },
+                onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
+                onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
-                onBolsa = { },
+                onBolsa = { navegarTabInferior(navController, RutaCarritoOutlet) },
                 onPerfil = { },
             )
         },
     ) { padding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .background(Color.White),
+                .padding(padding),
         ) {
+            if (cargandoCatalogo && articulos.isEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = OlivaVintage,
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White),
+                ) {
             item {
                 Row(
                     modifier = Modifier
@@ -153,7 +221,7 @@ fun PantallaMenuInicioOutlet(
             }
             item {
                 Text(
-                    text = "MARCAS DESTACADAS",
+                    text = "CATEGORÍAS",
                     color = OlivaVintage,
                         style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
@@ -164,11 +232,21 @@ fun PantallaMenuInicioOutlet(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp),
                 ) {
-                    items(marcas) { (nombre, resId) ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    items(
+                        items = categoriasDestacadas,
+                        key = { c -> "${c.categoriaFiltro}_${c.etiqueta}" },
+                    ) { categoriaChip ->
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.clickable {
+                                navController.navigate(
+                                    RutaCatalogoPorCategoria(categoria = categoriaChip.categoriaFiltro),
+                                )
+                            },
+                        ) {
                             Image(
-                                painter = painterResource(resId),
-                                contentDescription = nombre,
+                                painter = painterResource(categoriaChip.iconoResId),
+                                contentDescription = categoriaChip.etiqueta,
                                 modifier = Modifier
                                     .size(72.dp)
                                     .clip(CircleShape)
@@ -176,7 +254,7 @@ fun PantallaMenuInicioOutlet(
                                 contentScale = ContentScale.Crop,
                             )
                             Spacer(modifier = Modifier.height(6.dp))
-                            Text(nombre, style = MaterialTheme.typography.labelMedium)
+                            Text(categoriaChip.etiqueta, style = MaterialTheme.typography.labelMedium)
                         }
                     }
                 }
@@ -190,51 +268,285 @@ fun PantallaMenuInicioOutlet(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        "ÚLTIMOS ARTÍCULOS",
+                        if (hayBusquedaActiva) {
+                            "RESULTADOS DE BÚSQUEDA"
+                        } else {
+                            "ÚLTIMOS ARTÍCULOS"
+                        },
                         color = OlivaVintage,
                         style = MaterialTheme.typography.labelMedium,
                     )
-                    Text(
-                        "VER TODO",
-                        style = MaterialTheme.typography.labelSmall,
-                        textDecoration = TextDecoration.Underline,
-                        modifier = Modifier.clickable { /* avance */ },
-                    )
-                }
-            }
-            items(articulos.chunked(2)) { fila ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    fila.forEach { art ->
-                        TarjetaPolaroidOutlet(
-                            articulo = art,
-                            esFavorito = favoritos.contains(art.idMostrar),
-                            onToggleFavorito = {
-                                onToggleFavorito(art.idMostrar)
+                    if (!hayBusquedaActiva) {
+                        Text(
+                            "VER TODO",
+                            style = MaterialTheme.typography.labelSmall,
+                            textDecoration = TextDecoration.Underline,
+                            color = OlivaVintage,
+                            modifier = Modifier.clickable {
+                                navController.navigate(RutaCatalogoCompletoOutlet)
                             },
-                            onClickFoto = {
-                                navController.navigate(
-                                    RutaDetalleArticulo(
-                                        titulo = art.titulo,
-                                        precioPesosEntero = art.precioPesosEntero,
-                                        descripcion = art.descripcion,
-                                        imagenUrl = art.imagenUrl,
-                                    ),
-                                )
-                            },
-                            modifier = Modifier.weight(1f),
                         )
                     }
-                    if (fila.size == 1) {
-                        Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+            if (hayBusquedaActiva && articulosInicio.isEmpty()) {
+                item {
+                    Text(
+                        text = "No hay artículos que coincidan con tu búsqueda.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = GrisSecundario,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
+            } else {
+                items(articulosInicio.chunked(2)) { fila ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        fila.forEach { art ->
+                            TarjetaPolaroidOutlet(
+                                articulo = art,
+                                esFavorito = favoritos.contains(art.idMostrar),
+                                onToggleFavorito = {
+                                    onToggleFavorito(art.idMostrar)
+                                },
+                                onClickFoto = {
+                                    navController.navigate(
+                                        RutaDetalleArticulo(
+                                            idMostrar = art.idMostrar,
+                                            titulo = art.titulo,
+                                            precioPesosEntero = art.precioPesosEntero,
+                                            descripcion = art.descripcion,
+                                            imagenUrl = art.imagenUrl,
+                                        ),
+                                    )
+                                },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        if (fila.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             }
             item { Spacer(modifier = Modifier.height(16.dp)) }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PantallaCatalogoCompletoOutlet(
+    navController: NavHostController,
+    articulos: List<ArticuloOutlet>,
+    favoritos: List<String>,
+    cargandoCatalogo: Boolean,
+    onToggleFavorito: (String) -> Unit,
+    onIrCarrito: () -> Unit,
+) {
+    Scaffold(
+        containerColor = Color.White,
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "Todos los artículos",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                    }
+                },
+            )
+        },
+        bottomBar = {
+            BarraNavegacionInferiorOutlet(
+                onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
+                onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
+                onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
+                onBolsa = { navegarTabInferior(navController, RutaCarritoOutlet) },
+                onPerfil = { },
+            )
+        },
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+        ) {
+            if (cargandoCatalogo && articulos.isEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = OlivaVintage,
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White),
+                ) {
+                    items(articulos.chunked(2)) { fila ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            fila.forEach { art ->
+                                TarjetaPolaroidOutlet(
+                                    articulo = art,
+                                    esFavorito = favoritos.contains(art.idMostrar),
+                                    onToggleFavorito = {
+                                        onToggleFavorito(art.idMostrar)
+                                    },
+                                    onClickFoto = {
+                                        navController.navigate(
+                                            RutaDetalleArticulo(
+                                                idMostrar = art.idMostrar,
+                                                titulo = art.titulo,
+                                                precioPesosEntero = art.precioPesosEntero,
+                                                descripcion = art.descripcion,
+                                                imagenUrl = art.imagenUrl,
+                                            ),
+                                        )
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            if (fila.size == 1) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                }
+            }
+        }
+    }
+}
+
+private fun tituloCategoriaParaBarra(raw: String): String {
+    if (raw.isBlank()) return raw
+    val partes = raw.split(" ", "-").filter { it.isNotEmpty() }
+    if (partes.isEmpty()) return raw.replaceFirstChar { it.uppercaseChar() }
+    return partes.joinToString(" ") { token ->
+        token.replaceFirstChar { ch ->
+            if (ch.isLowerCase()) ch.titlecase(Locale.getDefault()) else ch.toString()
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PantallaCatalogoPorCategoriaOutlet(
+    navController: NavHostController,
+    categoria: String,
+    articulos: List<ArticuloOutlet>,
+    favoritos: List<String>,
+    cargandoCatalogo: Boolean,
+    onToggleFavorito: (String) -> Unit,
+    onIrCarrito: () -> Unit,
+) {
+    val articulosCategoria = remember(articulos, categoria) {
+        articulos.filter { it.categoria.equals(categoria, ignoreCase = true) }
+    }
+    val tituloBarra = remember(categoria) { tituloCategoriaParaBarra(categoria) }
+    Scaffold(
+        containerColor = Color.White,
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        tituloBarra,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                    }
+                },
+            )
+        },
+        bottomBar = {
+            BarraNavegacionInferiorOutlet(
+                onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
+                onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
+                onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
+                onBolsa = { navegarTabInferior(navController, RutaCarritoOutlet) },
+                onPerfil = { },
+            )
+        },
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+        ) {
+            if (cargandoCatalogo && articulos.isEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = OlivaVintage,
+                )
+            } else if (articulosCategoria.isEmpty()) {
+                Text(
+                    text = "No hay artículos en esta categoría.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = GrisSecundario,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(24.dp),
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White),
+                ) {
+                    items(articulosCategoria.chunked(2)) { fila ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            fila.forEach { art ->
+                                TarjetaPolaroidOutlet(
+                                    articulo = art,
+                                    esFavorito = favoritos.contains(art.idMostrar),
+                                    onToggleFavorito = {
+                                        onToggleFavorito(art.idMostrar)
+                                    },
+                                    onClickFoto = {
+                                        navController.navigate(
+                                            RutaDetalleArticulo(
+                                                idMostrar = art.idMostrar,
+                                                titulo = art.titulo,
+                                                precioPesosEntero = art.precioPesosEntero,
+                                                descripcion = art.descripcion,
+                                                imagenUrl = art.imagenUrl,
+                                            ),
+                                        )
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            if (fila.size == 1) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                }
+            }
         }
     }
 }
@@ -244,6 +556,7 @@ fun PantallaFavoritosOutlet(
     navController: NavHostController,
     articulos: List<ArticuloOutlet>,
     favoritos: List<String>,
+    onIrCarrito: () -> Unit,
 ) {
     val articulosFavoritos = remember(articulos, favoritos) {
         articulos.filter { it.idMostrar in favoritos }
@@ -253,10 +566,10 @@ fun PantallaFavoritosOutlet(
         containerColor = Color.White,
         bottomBar = {
             BarraNavegacionInferiorOutlet(
-                onExplorar = { navController.popBackStack() },
+                onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
                 onDeseos = { },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
-                onBolsa = { },
+                onBolsa = { navegarTabInferior(navController, RutaCarritoOutlet) },
                 onPerfil = { },
             )
         },
@@ -292,6 +605,7 @@ fun PantallaFavoritosOutlet(
                         onClick = {
                             navController.navigate(
                                 RutaDetalleArticulo(
+                                    idMostrar = art.idMostrar,
                                     titulo = art.titulo,
                                     precioPesosEntero = art.precioPesosEntero,
                                     descripcion = art.descripcion,
@@ -301,6 +615,176 @@ fun PantallaFavoritosOutlet(
                         },
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun PantallaCarritoOutlet(
+    navController: NavHostController,
+    articulos: List<ArticuloOutlet>,
+    carritoViewModel: CarritoViewModel,
+) {
+    LaunchedEffect(Unit) {
+        carritoViewModel.sincronizarCarritoUsuario()
+    }
+
+    val carrito = carritoViewModel.carritoActivo
+    val cargando = carritoViewModel.cargando
+    val lineas = carrito?.productos.orEmpty()
+    val errorMsg = carritoViewModel.error
+
+    Scaffold(
+        containerColor = Color.White,
+        bottomBar = {
+            BarraNavegacionInferiorOutlet(
+                onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
+                onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
+                onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
+                onBolsa = { },
+                onPerfil = { },
+            )
+        },
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .background(Color.White),
+        ) {
+            if (cargando) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = OlivaVintage,
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    item {
+                        Text(
+                            text = "TU CARRITO",
+                            color = OlivaVintage,
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+                    if (errorMsg.isNotEmpty() && lineas.isEmpty()) {
+                        item {
+                            Text(
+                                text = errorMsg,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = GrisSecundario,
+                            )
+                        }
+                    }
+                    if (lineas.isEmpty() && errorMsg.isEmpty()) {
+                        item {
+                            Text(
+                                text = "Tu carrito está vacío.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = GrisSecundario,
+                            )
+                        }
+                    } else {
+                        items(lineas, key = { it.productId }) { linea ->
+                            val art = articuloPorProductId(articulos, linea.productId)
+                            TarjetaCarritoLineaOutlet(
+                                linea = linea,
+                                articulo = art,
+                                onIrDetalle = {
+                                    art?.let { a ->
+                                        navController.navigate(
+                                            RutaDetalleArticulo(
+                                                idMostrar = a.idMostrar,
+                                                titulo = a.titulo,
+                                                precioPesosEntero = a.precioPesosEntero,
+                                                descripcion = a.descripcion,
+                                                imagenUrl = a.imagenUrl,
+                                            ),
+                                        )
+                                    }
+                                },
+                                onQuitar = { carritoViewModel.quitarProducto(linea.productId) },
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TarjetaCarritoLineaOutlet(
+    linea: ItemCarritoOutlet,
+    articulo: ArticuloOutlet?,
+    onIrDetalle: () -> Unit,
+    onQuitar: () -> Unit,
+) {
+    val titulo = articulo?.titulo ?: "Producto #${linea.productId}"
+    val imagenUrl = articulo?.imagenUrl.orEmpty()
+    val precioTexto = articulo?.let { "$${it.precioPesosEntero}.00" } ?: "—"
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(enabled = articulo != null) { onIrDetalle() },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                if (articulo != null) {
+                    ProductoImagenConShimmerOutlet(
+                        imagenUrl = imagenUrl,
+                        contentDescription = titulo,
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(FondoCrema),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(FondoCrema),
+                    )
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = titulo,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 2,
+                    )
+                    Text(
+                        text = precioTexto,
+                        color = OlivaVintage,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+            }
+            IconButton(onClick = onQuitar) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Quitar del carrito",
+                    tint = GrisSecundario,
+                )
             }
         }
     }

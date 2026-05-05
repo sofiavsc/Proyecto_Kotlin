@@ -1,12 +1,12 @@
 package com.example.proyectomov.back
 
-import com.example.proyectomov.back.remote.FakeStoreApiService
-import com.example.proyectomov.back.remote.CreateUserRequestDto
-import com.example.proyectomov.back.remote.CreateUserResponseDto
-import com.example.proyectomov.back.remote.UserAddressDto
-import com.example.proyectomov.back.remote.UserDto
-import com.example.proyectomov.back.remote.UserNameDto
-import com.example.proyectomov.back.remote.UserUpsertDto
+import com.example.proyectomov.back.api.FakeStoreApiService
+import com.example.proyectomov.back.api.CreateUserRequestDto
+import com.example.proyectomov.back.api.CreateUserResponseDto
+import com.example.proyectomov.back.api.UserAddressDto
+import com.example.proyectomov.back.api.UserDto
+import com.example.proyectomov.back.api.UserNameDto
+import com.example.proyectomov.back.api.UserUpsertDto
 
 class UsuariosRepository(
     private val api: FakeStoreApiService,
