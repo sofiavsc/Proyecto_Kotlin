@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.core.os.ConfigurationCompat
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
@@ -33,8 +34,12 @@ class MainActivity : AppCompatActivity() {
             enableEdgeToEdge()
         }
         setContent {
-            val locales = LocalConfiguration.current.locales
-            key(locales[0]?.toLanguageTag().orEmpty()) {
+            val localeTag =
+                ConfigurationCompat.getLocales(LocalConfiguration.current)
+                    .get(0)
+                    ?.toLanguageTag()
+                    .orEmpty()
+            key(localeTag) {
                 ProyectoMovTheme {
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                         NavegacionVintageOutlet(

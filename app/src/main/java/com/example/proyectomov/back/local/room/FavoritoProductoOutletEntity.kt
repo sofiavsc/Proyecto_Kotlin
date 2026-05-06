@@ -1,9 +1,13 @@
 package com.example.proyectomov.back.local.room
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity(tableName = "favoritos_producto")
+@Entity(
+    tableName = "favoritos_producto",
+    primaryKeys = ["usuario_id", "idMostrar"],
+)
 data class FavoritoProductoOutletEntity(
-    @PrimaryKey val idMostrar: String,
+    @ColumnInfo(name = "usuario_id") val usuarioId: Int,
+    @ColumnInfo(name = "idMostrar") val idMostrar: String,
 )

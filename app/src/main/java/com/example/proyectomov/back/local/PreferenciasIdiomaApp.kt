@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.LocaleList
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
 
 object PreferenciasIdiomaApp {
@@ -42,7 +43,11 @@ object PreferenciasIdiomaApp {
                 else -> TAG_ES
             }
         }
-        val sys = context.resources.configuration.locales[0]?.language ?: TAG_ES
+        val sys =
+            ConfigurationCompat.getLocales(context.resources.configuration)
+                .get(0)
+                ?.language
+                ?: TAG_ES
         return if (sys == TAG_EN) TAG_EN else TAG_ES
     }
 }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -150,10 +149,6 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
     val contexto = LocalContext.current
     val carritoVm = viewModel<CarritoViewModel>()
 
-    LaunchedEffect(Unit) {
-        carritoVm.sincronizarCarritoUsuario()
-    }
-
     val navFadeMs = 200
     NavHost(
         navController = navController,
@@ -208,7 +203,7 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
                 favoritos = favoritosLista,
                 cargandoCatalogo = catalogoVm.cargando,
                 onToggleFavorito = { id -> favoritosVm.alternarFavorito(id) },
-                onIrCarrito = { navController.navigate(RutaCarritoOutlet) },
+                onIrCarrito = { navegarTabInferior(navController, RutaCarritoOutlet) },
             )
         }
         composable<RutaCatalogoCompletoOutlet> {
@@ -218,7 +213,7 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
                 favoritos = favoritosLista,
                 cargandoCatalogo = catalogoVm.cargando,
                 onToggleFavorito = { id -> favoritosVm.alternarFavorito(id) },
-                onIrCarrito = { navController.navigate(RutaCarritoOutlet) },
+                onIrCarrito = { navegarTabInferior(navController, RutaCarritoOutlet) },
             )
         }
         composable<RutaCatalogoPorCategoria> {
@@ -230,7 +225,7 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
                 favoritos = favoritosLista,
                 cargandoCatalogo = catalogoVm.cargando,
                 onToggleFavorito = { id -> favoritosVm.alternarFavorito(id) },
-                onIrCarrito = { navController.navigate(RutaCarritoOutlet) },
+                onIrCarrito = { navegarTabInferior(navController, RutaCarritoOutlet) },
             )
         }
         composable<RutaCarritoOutlet> {
@@ -245,7 +240,7 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
                 navController = navController,
                 articulos = articulos,
                 favoritos = favoritosLista,
-                onIrCarrito = { navController.navigate(RutaCarritoOutlet) },
+                onIrCarrito = { navegarTabInferior(navController, RutaCarritoOutlet) },
             )
         }
         composable<RutaPerfilOutlet> {

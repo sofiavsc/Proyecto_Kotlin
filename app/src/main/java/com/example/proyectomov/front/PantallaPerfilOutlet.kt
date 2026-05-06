@@ -75,7 +75,7 @@ fun PantallaPerfilOutlet(
                 onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
                 onBolsa = { navegarTabInferior(navController, RutaCarritoOutlet) },
-                onPerfil = { },
+                onPerfil = { navegarTabInferior(navController, RutaPerfilOutlet) },
             )
         },
     ) { padding ->

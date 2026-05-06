@@ -2,11 +2,6 @@ package com.example.proyectomov.front
 
 import android.widget.Toast
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -61,7 +56,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -118,15 +112,6 @@ internal inline fun <reified T : Any> navegarTabInferior(
         popUpTo(RutaMenuInicioOutlet) {
             saveState = true
         }
-    }
-}
-
-/** Desde la pantalla Bolsa, ir a Explorar: quitar el carrito del back stack de forma explícita (evita quedarse en Bolsa con rutas type-safe). */
-internal fun navegarAInicioDesdeCarrito(navController: NavHostController) {
-    navController.navigate(RutaMenuInicioOutlet) {
-        popUpTo(RutaCarritoOutlet) { inclusive = true }
-        launchSingleTop = true
-        restoreState = true
     }
 }
 
@@ -717,7 +702,7 @@ fun PantallaFavoritosOutlet(
             BarraNavegacionInferiorOutlet(
                 tabSeleccionada = TabBarraOutlet.Deseos,
                 onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
-                onDeseos = { },
+                onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
                 onBolsa = onIrCarrito,
                 onPerfil = { navegarTabInferior(navController, RutaPerfilOutlet) },
@@ -776,13 +761,8 @@ fun PantallaCarritoOutlet(
     articulos: List<ArticuloOutlet>,
     carritoViewModel: CarritoViewModel,
 ) {
-    LaunchedEffect(Unit) {
-        carritoViewModel.sincronizarCarritoUsuario()
-    }
-
     val contexto = LocalContext.current
     val carrito = carritoViewModel.carritoActivo
-    val cargando = carritoViewModel.cargando
     val lineas = carrito?.productos.orEmpty()
     val errorMsg = carritoViewModel.error
     val totalPesos = totalCarritoPesosEntero(articulos, lineas)
@@ -792,11 +772,7 @@ fun PantallaCarritoOutlet(
         containerColor = Color.White,
         bottomBar = {
             Column(modifier = Modifier.background(Color.White)) {
-                AnimatedVisibility(
-                    visible = !cargando && lineas.isNotEmpty(),
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut(),
-                ) {
+                if (lineas.isNotEmpty()) {
                     Column {
                         Row(
                             modifier = Modifier
@@ -835,10 +811,10 @@ fun PantallaCarritoOutlet(
                 }
                 BarraNavegacionInferiorOutlet(
                     tabSeleccionada = TabBarraOutlet.Bolsa,
-                    onExplorar = { navegarAInicioDesdeCarrito(navController) },
+                    onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
                     onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                     onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
-                    onBolsa = { },
+                    onBolsa = { navegarTabInferior(navController, RutaCarritoOutlet) },
                     onPerfil = { navegarTabInferior(navController, RutaPerfilOutlet) },
                 )
             }
@@ -850,12 +826,6 @@ fun PantallaCarritoOutlet(
                 .padding(padding)
                 .background(Color.White),
         ) {
-            if (cargando) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = OlivaVintage,
-                )
-            } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
@@ -911,7 +881,6 @@ fun PantallaCarritoOutlet(
                 }
             }
         }
-    }
 }
 
 @Composable

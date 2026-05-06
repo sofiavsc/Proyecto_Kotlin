@@ -7,8 +7,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.proyectomov.R
-import com.example.proyectomov.back.api.ApiClient
+import com.example.proyectomov.back.local.room.CarritoLocalLineaEntity
+import com.example.proyectomov.back.local.room.OutletRoomDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -17,13 +21,12 @@ class CarritoViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
 
-    private val repository: CarritoRepository = CarritoRepository(ApiClient.fakeStoreApi)
+    private val dao = OutletRoomDatabase.obtener(application).carritoLocalLineaDao()
+    private val cuentasRepository = UsuarioCuentasRepository(application.applicationContext)
 
     private fun str(id: Int) = getApplication<Application>().getString(id)
-    var carritoActivo by mutableStateOf<CarritoOutlet?>(null)
-        private set
 
-    var cargando by mutableStateOf(false)
+    var carritoActivo by mutableStateOf<CarritoOutlet?>(null)
         private set
 
     var operando by mutableStateOf(false)
@@ -32,20 +35,48 @@ class CarritoViewModel(
     var error by mutableStateOf("")
         private set
 
-    private var idCarritoSesion: Int? = null
-
     companion object {
-        const val USER_ID_DEMO = 1
+        /** Carrito persistente sólo en Room; mismo id estable para todas las líneas locales. */
+        private const val CARRITO_LOCAL_ID_UI = -1
     }
 
     private fun fechaHoyIso(): String =
         SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
 
+    private suspend fun cargarParaUsuario(usuarioId: Int?) {
+        when {
+            usuarioId == null || usuarioId <= 0 -> carritoActivo = null
+            else -> {
+                val lineas = withContext(Dispatchers.IO) {
+                    dao.lineasPorUsuario(usuarioId).map { fila ->
+                        ItemCarritoOutlet(productId = fila.productId, cantidad = fila.cantidad)
+                    }
+                }
+                carritoActivo = CarritoOutlet(
+                    id = CARRITO_LOCAL_ID_UI,
+                    userId = usuarioId,
+                    fecha = fechaHoyIso(),
+                    productos = lineas,
+                )
+            }
+        }
+        error = ""
+    }
+
+    init {
+        viewModelScope.launch {
+            cuentasRepository.sesionUsuarioIdFlow().collectLatest { usuarioId ->
+                cargarParaUsuario(usuarioId)
+            }
+        }
+    }
+
     fun sincronizarCarritoUsuario(alTerminar: (() -> Unit)? = null) {
         viewModelScope.launch {
-            cargando = true
             error = ""
-            cargando = false
+            val uid =
+                withContext(Dispatchers.IO) { cuentasRepository.obtenerSesionUsuarioId() }
+            cargarParaUsuario(uid)
             alTerminar?.invoke()
         }
     }
@@ -54,102 +85,58 @@ class CarritoViewModel(
         viewModelScope.launch {
             operando = true
             error = ""
-            val fecha = fechaHoyIso()
-            val idSesion = idCarritoSesion
-
-            if (idSesion == null) {
-                repository
-                    .crearCarrito(
-                        userId = USER_ID_DEMO,
-                        fecha = fecha,
-                        productos = listOf(ItemCarritoOutlet(productId = productId, cantidad = 1)),
-                    )
-                    .fold(
-                        onSuccess = { guardado ->
-                            idCarritoSesion = guardado.id
-                            carritoActivo = guardado
-                            operando = false
-                            alResultado(true, str(R.string.msg_cart_added))
-                        },
-                        onFailure = { ex ->
-                            operando = false
-                            error = ex.message ?: str(R.string.cart_err_create)
-                            alResultado(false, error)
-                        },
-                    )
-                return@launch
-            }
-
-            val base = carritoActivo
-            if (base == null || base.id != idSesion) {
-                idCarritoSesion = null
-                carritoActivo = null
+            val usuarioId =
+                withContext(Dispatchers.IO) { cuentasRepository.obtenerSesionUsuarioId() }
+            if (usuarioId == null || usuarioId <= 0) {
                 operando = false
-                agregarProducto(productId, alResultado)
+                error = str(R.string.err_no_active_session)
+                alResultado(false, error)
                 return@launch
             }
 
-            if (base.productos.any { it.productId == productId }) {
+            val lineasPrevias = withContext(Dispatchers.IO) { dao.lineasPorUsuario(usuarioId) }
+            if (lineasPrevias.any { it.productId == productId }) {
                 operando = false
                 alResultado(true, str(R.string.msg_cart_already))
                 return@launch
             }
 
-            val nuevaLista =
-                base.productos + ItemCarritoOutlet(productId = productId, cantidad = 1)
-            repository
-                .actualizarCarrito(id = base.id, userId = USER_ID_DEMO, fecha = fecha, productos = nuevaLista)
-                .fold(
-                    onSuccess = { guardado ->
-                        idCarritoSesion = guardado.id
-                        carritoActivo = guardado
-                        operando = false
-                        alResultado(true, str(R.string.msg_cart_added))
-                    },
-                    onFailure = { ex ->
-                        operando = false
-                        error = ex.message ?: str(R.string.cart_err_update)
-                        alResultado(false, error)
-                    },
+            withContext(Dispatchers.IO) {
+                dao.insertarOReemplazar(
+                    CarritoLocalLineaEntity(
+                        usuarioId = usuarioId,
+                        productId = productId,
+                        cantidad = 1,
+                    ),
                 )
+            }
+            cargarParaUsuario(usuarioId)
+            operando = false
+            alResultado(true, str(R.string.msg_cart_added))
         }
     }
 
     fun quitarProducto(productId: Int) {
         viewModelScope.launch {
-            val idSesion = idCarritoSesion ?: return@launch
+            val usuarioId =
+                withContext(Dispatchers.IO) { cuentasRepository.obtenerSesionUsuarioId() }
+                ?: return@launch
             operando = true
             error = ""
-
-            val base = carritoActivo
-            if (base == null || base.id != idSesion) {
-                operando = false
-                return@launch
-            }
-
-            val nuevaLista = base.productos.filter { it.productId != productId }
-            repository.actualizarCarrito(
-                id = base.id,
-                userId = USER_ID_DEMO,
-                fecha = fechaHoyIso(),
-                productos = nuevaLista,
-            ).fold(
-                onSuccess = { guardado ->
-                    carritoActivo = guardado
-                    operando = false
-                },
-                onFailure = { ex ->
-                    operando = false
-                    error = ex.message ?: str(R.string.cart_err_remove)
-                },
-            )
+            withContext(Dispatchers.IO) { dao.borrarLinea(usuarioId, productId) }
+            cargarParaUsuario(usuarioId)
+            operando = false
         }
     }
 
-    /** Vacía el carrito solo en memoria (no persiste en el dispositivo). */
     fun finalizarCompraLocal() {
-        idCarritoSesion = null
-        carritoActivo = null
-        error = ""
+        viewModelScope.launch {
+            val usuarioId =
+                withContext(Dispatchers.IO) { cuentasRepository.obtenerSesionUsuarioId() }
+                ?: return@launch
+            withContext(Dispatchers.IO) { dao.borrarTodoUsuario(usuarioId) }
+            cargarParaUsuario(usuarioId)
+            error = ""
+        }
     }
 }
