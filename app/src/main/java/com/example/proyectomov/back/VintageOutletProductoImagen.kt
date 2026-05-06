@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.example.proyectomov.R
 
 /**
@@ -38,6 +39,8 @@ fun ProductoImagenConShimmerOutlet(
     val request: ImageRequest = remember(url, context) {
         ImageRequest.Builder(context)
             .data(url)
+            // Evita animación de alcance ~0 ms que en emuladores dispara asserts en JankTracker/HWUI.
+            .crossfade(false)
             .build()
     }
 

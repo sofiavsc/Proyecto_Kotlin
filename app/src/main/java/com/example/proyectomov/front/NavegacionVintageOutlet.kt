@@ -1,18 +1,22 @@
 package com.example.proyectomov.front
 
 import android.widget.Toast
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
@@ -23,7 +27,9 @@ import com.example.proyectomov.R
 import com.example.proyectomov.back.CarritoViewModel
 import com.example.proyectomov.back.CategoriaDestacadaOutlet
 import com.example.proyectomov.back.CatalogoOutletViewModel
+import com.example.proyectomov.back.FavoritosViewModel
 import com.example.proyectomov.back.InicioSesionViewModel
+import com.example.proyectomov.back.PerfilViewModel
 import com.example.proyectomov.back.RegistroViewModel
 import com.example.proyectomov.ui.theme.ProyectoMovTheme
 import kotlinx.serialization.Serializable
@@ -51,6 +57,13 @@ object RutaCarritoOutlet
 @Serializable
 object RutaAgregarArticuloOutlet
 
+/** Perfil del usuario (cuenta local). */
+@Serializable
+object RutaPerfilOutlet
+
+@Serializable
+object RutaAjustesOutlet
+
 @Serializable
 object RutaCatalogoCompletoOutlet
 
@@ -77,12 +90,13 @@ private fun iconoParaCategoriaDestacada(categoriaFiltro: String): Int {
     }
 }
 
+@Composable
 private fun etiquetaCategoriaDestacada(categoriaFiltro: String): String {
     return when (categoriaFiltro.lowercase(Locale.ROOT)) {
-        "electronics" -> "ELECTRÓNICOS"
-        "jewelery" -> "JOYERÍA"
-        "men's clothing" -> "ROPA HOMBRE"
-        "women's clothing" -> "ROPA MUJER"
+        "electronics" -> stringResource(R.string.cat_dest_electronics)
+        "jewelery" -> stringResource(R.string.cat_dest_jewelry)
+        "men's clothing" -> stringResource(R.string.cat_dest_mens_clothing)
+        "women's clothing" -> stringResource(R.string.cat_dest_womens_clothing)
         else -> categoriaFiltro.uppercase(Locale.getDefault())
     }
 }
@@ -107,6 +121,9 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
 
     val navController = rememberNavController()
     val catalogoVm = viewModel<CatalogoOutletViewModel>()
+    val favoritosVm = viewModel<FavoritosViewModel>()
+    val favoritosIds by favoritosVm.idsFavoritos.collectAsStateWithLifecycle()
+    val favoritosLista = favoritosIds.toList().sorted()
     val articulos = catalogoVm.articulos
     val iconPorDefecto = R.drawable.ic_launcher_foreground
     val categoriasDestacadas = if (catalogoVm.categorias.isNotEmpty()) {
@@ -119,12 +136,19 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
         }
     } else {
         listOf(
-            CategoriaDestacadaOutlet("CHAQUETAS", "Chaquetas", iconPorDefecto),
-            CategoriaDestacadaOutlet("DENIM", "Denim", iconPorDefecto),
-            CategoriaDestacadaOutlet("CALZADO", "Calzado", iconPorDefecto),
+            CategoriaDestacadaOutlet(
+                stringResource(R.string.cat_chip_jackets),
+                "Chaquetas",
+                iconPorDefecto,
+            ),
+            CategoriaDestacadaOutlet(stringResource(R.string.cat_chip_denim), "Denim", iconPorDefecto),
+            CategoriaDestacadaOutlet(
+                stringResource(R.string.cat_chip_footwear),
+                "Calzado",
+                iconPorDefecto,
+            ),
         )
     }
-    val favoritos = remember { mutableStateListOf<String>() }
     val contexto = LocalContext.current
     val carritoVm = viewModel<CarritoViewModel>()
 
@@ -132,10 +156,15 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
         carritoVm.sincronizarCarritoUsuario()
     }
 
+    val navFadeMs = 200
     NavHost(
         navController = navController,
         startDestination = RutaBienvenidaOutlet,
         modifier = Modifier.padding(innerPadding),
+        enterTransition = { fadeIn(animationSpec = tween(navFadeMs)) },
+        exitTransition = { fadeOut(animationSpec = tween(navFadeMs)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(navFadeMs)) },
+        popExitTransition = { fadeOut(animationSpec = tween(navFadeMs)) },
     ) {
         composable<RutaBienvenidaOutlet> {
             PantallaBienvenidaOutlet(
@@ -161,7 +190,11 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
                 viewModel = vmRegistro,
                 onVolver = { navController.popBackStack() },
                 onRegistroExitoso = {
-                    Toast.makeText(contexto, "registro exitoso", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        contexto,
+                        contexto.getString(R.string.toast_registration_ok),
+                        Toast.LENGTH_SHORT,
+                    ).show()
                     navController.navigate(RutaAccesoOutlet) {
                         popUpTo(RutaBienvenidaOutlet) { inclusive = false }
                         launchSingleTop = true
@@ -174,11 +207,9 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
                 navController = navController,
                 articulos = articulos,
                 categoriasDestacadas = categoriasDestacadas,
-                favoritos = favoritos,
+                favoritos = favoritosLista,
                 cargandoCatalogo = catalogoVm.cargando,
-                onToggleFavorito = { id ->
-                    if (favoritos.contains(id)) favoritos.remove(id) else favoritos.add(id)
-                },
+                onToggleFavorito = { id -> favoritosVm.alternarFavorito(id) },
                 onIrCarrito = { navController.navigate(RutaCarritoOutlet) },
             )
         }
@@ -186,11 +217,9 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
             PantallaCatalogoCompletoOutlet(
                 navController = navController,
                 articulos = articulos,
-                favoritos = favoritos,
+                favoritos = favoritosLista,
                 cargandoCatalogo = catalogoVm.cargando,
-                onToggleFavorito = { id ->
-                    if (favoritos.contains(id)) favoritos.remove(id) else favoritos.add(id)
-                },
+                onToggleFavorito = { id -> favoritosVm.alternarFavorito(id) },
                 onIrCarrito = { navController.navigate(RutaCarritoOutlet) },
             )
         }
@@ -200,11 +229,9 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
                 navController = navController,
                 categoria = args.categoria,
                 articulos = articulos,
-                favoritos = favoritos,
+                favoritos = favoritosLista,
                 cargandoCatalogo = catalogoVm.cargando,
-                onToggleFavorito = { id ->
-                    if (favoritos.contains(id)) favoritos.remove(id) else favoritos.add(id)
-                },
+                onToggleFavorito = { id -> favoritosVm.alternarFavorito(id) },
                 onIrCarrito = { navController.navigate(RutaCarritoOutlet) },
             )
         }
@@ -219,13 +246,35 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
             PantallaFavoritosOutlet(
                 navController = navController,
                 articulos = articulos,
-                favoritos = favoritos,
+                favoritos = favoritosLista,
                 onIrCarrito = { navController.navigate(RutaCarritoOutlet) },
+            )
+        }
+        composable<RutaPerfilOutlet> {
+            val perfilVm: PerfilViewModel = viewModel()
+            PantallaPerfilOutlet(
+                navController = navController,
+                viewModel = perfilVm,
+            )
+        }
+        composable<RutaAjustesOutlet> {
+            PantallaAjustesOutlet(
+                navController = navController,
+                onIdiomaCambiado = { catalogoVm.cargarCatalogo() },
             )
         }
         composable<RutaAgregarArticuloOutlet> {
             PantallaAgregarArticuloOutlet(
+                viewModel = catalogoVm,
                 onVolver = { navController.popBackStack() },
+                onPublicado = {
+                    Toast.makeText(
+                        contexto,
+                        contexto.getString(R.string.toast_article_published),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                    navController.popBackStack()
+                },
             )
         }
         composable<RutaDetalleArticulo> {
@@ -234,10 +283,9 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
             PantallaDetalleArticuloOutlet(
                 datos = datos,
                 navController = navController,
-                esFavorito = favoritos.contains(datos.idMostrar),
+                esFavorito = favoritosIds.contains(datos.idMostrar),
                 onToggleFavorito = {
-                    val id = datos.idMostrar
-                    if (favoritos.contains(id)) favoritos.remove(id) else favoritos.add(id)
+                    favoritosVm.alternarFavorito(datos.idMostrar)
                 },
                 carritoViewModel = carritoVm,
                 productIdApi = productIdApi,

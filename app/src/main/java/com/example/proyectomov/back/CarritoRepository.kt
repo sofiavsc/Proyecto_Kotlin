@@ -8,18 +8,6 @@ import com.example.proyectomov.back.api.FakeStoreApiService
 class CarritoRepository(
     private val api: FakeStoreApiService,
 ) {
-    suspend fun obtenerCarritos(): Result<List<CarritoOutlet>> = runCatching {
-        api.getCarts().map { it.toCarritoOutlet() }
-    }
-
-    suspend fun obtenerCarrito(id: Int): Result<CarritoOutlet> = runCatching {
-        api.getCart(id).toCarritoOutlet()
-    }
-
-    suspend fun obtenerCarritosPorUsuario(userId: Int): Result<List<CarritoOutlet>> = runCatching {
-        api.getCartsByUser(userId).map { it.toCarritoOutlet() }
-    }
-
     suspend fun crearCarrito(userId: Int, fecha: String, productos: List<ItemCarritoOutlet>): Result<CarritoOutlet> =
         runCatching {
             api.createCart(
@@ -45,10 +33,6 @@ class CarritoRepository(
                 products = productos.map { CartProductDto(productId = it.productId, quantity = it.cantidad) },
             ),
         ).toCarritoOutlet()
-    }
-
-    suspend fun eliminarCarrito(id: Int): Result<CarritoOutlet> = runCatching {
-        api.deleteCart(id).toCarritoOutlet()
     }
 }
 

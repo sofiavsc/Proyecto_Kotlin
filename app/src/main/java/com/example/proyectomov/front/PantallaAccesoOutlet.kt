@@ -1,5 +1,6 @@
 package com.example.proyectomov.front
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,11 +22,9 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -36,6 +35,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
@@ -47,6 +49,7 @@ import com.example.proyectomov.back.GrisBordeCampo
 import com.example.proyectomov.back.GrisSecundario
 import com.example.proyectomov.back.InicioSesionViewModel
 import com.example.proyectomov.back.OlivaVintage
+import com.example.proyectomov.R
 import com.example.proyectomov.ui.theme.ProyectoMovTheme
 
 @Composable
@@ -93,10 +96,13 @@ private fun PantallaAccesoOutletContenido(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onVolver) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.cd_back),
+                )
             }
             Text(
-                text = "Sign In",
+                text = stringResource(R.string.login_title),
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleLarge,
             )
@@ -109,12 +115,22 @@ private fun PantallaAccesoOutletContenido(
                 .height(200.dp)
                 .padding(horizontal = 0.dp),
         ) {
+            Image(
+                painter = painterResource(R.drawable.vintage_outlet),
+                contentDescription = stringResource(R.string.hero_brand),
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(96.dp)
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color(0xFF8B7355), Color(0xFF5C4A38), Color(0xFF3D2E22)),
+                            0f to Color.Transparent,
+                            0.35f to Color(0x66000000),
+                            1f to Color(0xCC000000),
                         ),
                     ),
             )
@@ -124,7 +140,7 @@ private fun PantallaAccesoOutletContenido(
                     .padding(16.dp),
             ) {
                 Text(
-                    text = "VINTAGE OUTLET",
+                    text = stringResource(R.string.hero_brand),
                     color = Color.White,
                     style = MaterialTheme.typography.titleLarge,
                 )
@@ -133,7 +149,7 @@ private fun PantallaAccesoOutletContenido(
 
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             Text(
-                text = "Rediscover Style",
+                text = stringResource(R.string.headline_style),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontStyle = FontStyle.Italic,
                 ),
@@ -141,21 +157,21 @@ private fun PantallaAccesoOutletContenido(
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Log in to browse our curated second-hand archives.",
+                text = stringResource(R.string.sub_login),
                 style = MaterialTheme.typography.bodyMedium,
                 color = GrisSecundario,
             )
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "EMAIL ADDRESS",
+                text = stringResource(R.string.label_email_address),
                 style = MaterialTheme.typography.labelMedium,
             )
             OutlinedTextField(
                 value = correo,
                 onValueChange = { correo = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("vintage@collector.com", color = GrisSecundario) },
+                placeholder = { Text(stringResource(R.string.hint_email), color = GrisSecundario) },
                 singleLine = true,
                 shape = RoundedCornerShape(4.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -171,14 +187,16 @@ private fun PantallaAccesoOutletContenido(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "PASSWORD",
+                    text = stringResource(R.string.label_password_field),
                     style = MaterialTheme.typography.labelMedium,
                 )
                 Text(
-                    text = "Forgot?",
+                    text = stringResource(R.string.forgot_password),
                     color = OlivaVintage,
                     style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(end = 4.dp),
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                        .clickable { onIrARegistro() },
                 )
             }
             OutlinedTextField(
@@ -225,64 +243,24 @@ private fun PantallaAccesoOutletContenido(
                 shape = RoundedCornerShape(2.dp),
             ) {
                 Text(
-                    text = if (procesando) "VALIDANDO..." else "ENTER",
+                    text = if (procesando) {
+                        stringResource(R.string.validating)
+                    } else {
+                        stringResource(R.string.enter)
+                    },
                     color = Color.White,
                     style = MaterialTheme.typography.labelLarge,
                 )
-            }
-            Spacer(modifier = Modifier.height(22.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                HorizontalDivider(modifier = Modifier.weight(1f), color = GrisBordeCampo)
-                Text(
-                    text = "  OR CONNECT WITH  ",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontStyle = FontStyle.Italic,
-                    ),
-                    color = GrisSecundario,
-                )
-                HorizontalDivider(modifier = Modifier.weight(1f), color = GrisBordeCampo)
-            }
-            Spacer(modifier = Modifier.height(14.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                OutlinedButton(
-                    onClick = { },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(4.dp),
-                ) {
-                    Text(
-                        "GOOGLE",
-                        color = Color.Black,
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                }
-                OutlinedButton(
-                    onClick = { },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(4.dp),
-                ) {
-                    Text(
-                        "APPLE",
-                        color = Color.Black,
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                }
             }
             Spacer(modifier = Modifier.height(28.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Text(
-                    "Don't have an account? ",
+                    stringResource(R.string.no_account),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
-                    text = "Register Here",
+                    text = stringResource(R.string.register_here),
                     color = OlivaVintage,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontStyle = FontStyle.Italic,
@@ -316,7 +294,7 @@ private fun PantallaAccesoOutletPreviewError() {
     ProyectoMovTheme {
         PantallaAccesoOutletContenido(
             procesando = false,
-            mensajeError = "Correo o contraseña incorrectos.",
+            mensajeError = stringResource(R.string.repo_err_bad_credentials),
             onIntentarEntrar = { _, _, _ -> },
             alEntrarOk = {},
             onVolver = {},

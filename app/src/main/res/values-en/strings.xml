@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Vintage Outlet</string>
+
+    <string name="cd_back">Back</string>
+    <string name="cd_menu">Menu</string>
+    <string name="cd_profile">Profile</string>
+    <string name="cd_filter">Filter</string>
+    <string name="cd_favorite">Favorite</string>
+    <string name="cd_remove_from_cart">Remove from cart</string>
+    <string name="cd_edit_field">Edit %1$s</string>
+
+    <string name="brand_title">Vintage Outlet</string>
+    <string name="search_placeholder">Search vintage finds…</string>
+    <string name="clear_filters">Clear filters</string>
+    <string name="no_categories">No categories</string>
+    <string name="section_categories">CATEGORIES</string>
+    <string name="subtitle_results_both">RESULTS</string>
+    <string name="subtitle_results_search">SEARCH RESULTS</string>
+    <string name="subtitle_results_category">ITEMS BY CATEGORY</string>
+    <string name="subtitle_latest">LATEST ITEMS</string>
+    <string name="see_all">SEE ALL</string>
+    <string name="empty_no_match_both">No items match your search and selected categories.</string>
+    <string name="empty_no_match_search">No items match your search.</string>
+    <string name="empty_no_match_category">No items in the selected categories.</string>
+
+    <string name="title_all_items">All items</string>
+    <string name="title_no_items_category">No items in this category.</string>
+
+    <string name="cat_dest_electronics">ELECTRONICS</string>
+    <string name="cat_dest_jewelry">JEWELRY</string>
+    <string name="cat_dest_mens_clothing">MEN\'S CLOTHING</string>
+    <string name="cat_dest_womens_clothing">WOMEN\'S CLOTHING</string>
+    <string name="cat_chip_jackets">JACKETS</string>
+    <string name="cat_chip_denim">DENIM</string>
+    <string name="cat_chip_footwear">FOOTWEAR</string>
+
+    <string name="title_favorite_items">FAVORITE ITEMS</string>
+    <string name="empty_favorites">You don\'t have any favorites yet.</string>
+
+    <string name="title_your_cart">YOUR CART</string>
+    <string name="empty_cart">Your cart is empty.</string>
+    <string name="product_fallback">Product #%1$d</string>
+    <string name="id_label_format">ID: %1$s</string>
+
+    <string name="nav_explore">EXPLORE</string>
+    <string name="nav_wishlist">WISHLIST</string>
+    <string name="nav_sell">SELL</string>
+    <string name="nav_bag">BAG</string>
+    <string name="nav_profile_bar">PROFILE</string>
+
+    <string name="title_article_detail">Item details</string>
+    <string name="add_to_cart">Add to cart</string>
+    <string name="price_final_label">FINAL PRICE</string>
+
+    <string name="welcome_tagline">Buy and sell pieces with history</string>
+    <string name="btn_sign_in">SIGN IN</string>
+    <string name="btn_register">REGISTER</string>
+
+    <string name="login_title">Sign in</string>
+    <string name="hero_brand">VINTAGE OUTLET</string>
+    <string name="headline_style">Rediscover your style</string>
+    <string name="sub_login">Log in to browse our curated second-hand archive.</string>
+    <string name="label_email_address">EMAIL</string>
+    <string name="hint_email">vintage@collector.com</string>
+    <string name="label_password_field">PASSWORD</string>
+    <string name="forgot_password">Forgot?</string>
+    <string name="validating">SIGNING IN…</string>
+    <string name="enter">ENTER</string>
+    <string name="no_account">Don\'t have an account? </string>
+    <string name="register_here">Register here</string>
+
+    <string name="register_title">Register</string>
+    <string name="register_subtitle">Create your account to buy and sell vintage pieces.</string>
+    <string name="field_username">USERNAME</string>
+    <string name="field_email">EMAIL</string>
+    <string name="field_password">PASSWORD</string>
+    <string name="field_confirm_password">CONFIRM PASSWORD</string>
+    <string name="registering">REGISTERING…</string>
+    <string name="create_account">CREATE ACCOUNT</string>
+    <string name="have_account">Already have an account? </string>
+    <string name="sign_in_prompt">Sign in</string>
+
+    <string name="publish_title">List an item</string>
+    <string name="publish_subtitle">Enter the main details of your garment to create the listing.</string>
+    <string name="pub_field_title">TITLE</string>
+    <string name="pub_placeholder_title">e.g. 70s aviator jacket</string>
+    <string name="pub_field_category">CATEGORY</string>
+    <string name="pub_placeholder_category">Choose a category</string>
+    <string name="pub_field_price">PRICE (MXN)</string>
+    <string name="pub_placeholder_price">e.g. 850</string>
+    <string name="pub_field_desc">DESCRIPTION</string>
+    <string name="pub_placeholder_desc">Condition, size, relevant details…</string>
+    <string name="pub_err_title">Add a title.</string>
+    <string name="pub_err_category">Choose a category.</string>
+    <string name="pub_err_price">Add a price.</string>
+    <string name="pub_err_desc">Add a description.</string>
+    <string name="pub_field_image">IMAGE</string>
+    <string name="pub_placeholder_image">https://… URL (required by the store)</string>
+    <string name="pub_err_image">Add the image URL.</string>
+    <string name="pub_categories_loading">Loading categories…</string>
+    <string name="pub_categories_empty">No categories available. Check your connection and try again.</string>
+    <string name="pub_err_publish_generic">Could not publish. Try again.</string>
+    <string name="toast_article_published">Item published</string>
+    <string name="continue_btn">CONTINUE</string>
+    <string name="pub_publish_btn">PUBLISH</string>
+
+    <string name="profile_go_login">Go to sign in</string>
+    <string name="profile_title">Your profile</string>
+    <string name="profile_label_user">Username</string>
+    <string name="profile_label_email">Email</string>
+    <string name="profile_label_password">Password</string>
+    <string name="profile_password_masked">••••••••</string>
+    <string name="dlg_change_username">Change username</string>
+    <string name="dlg_change_email">Change email</string>
+    <string name="dlg_change_password">Change password</string>
+    <string name="field_username_dlg">Username</string>
+    <string name="field_email_dlg">Email address</string>
+    <string name="field_pass_current">Current password</string>
+    <string name="field_pass_new">New password</string>
+    <string name="field_pass_repeat">Repeat new password</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="toast_new_password_mismatch">The new passwords don\'t match.</string>
+
+    <string name="toast_registration_ok">Registration successful</string>
+
+    <string name="err_fill_email_password">Enter email and password</string>
+    <string name="err_login_generic">Could not sign in.</string>
+    <string name="err_sign_in_for_profile">Sign in to view your profile.</string>
+    <string name="err_load_profile">Could not load profile.</string>
+    <string name="err_no_active_session">No active session.</string>
+    <string name="msg_username_saved">Username updated.</string>
+    <string name="msg_email_saved">Email updated.</string>
+    <string name="msg_password_saved">Password updated.</string>
+    <string name="err_save_failed">Could not save.</string>
+    <string name="err_username_empty">Enter a username.</string>
+    <string name="err_email_invalid">Invalid email.</string>
+    <string name="err_password_short">Password must be at least 3 characters.</string>
+    <string name="err_passwords_mismatch">Passwords don\'t match.</string>
+    <string name="err_register_failed">Could not register.</string>
+    <string name="msg_cart_added">Item added to cart.</string>
+    <string name="msg_cart_already">Already in your cart.</string>
+    <string name="cart_err_create">Could not create cart.</string>
+    <string name="cart_err_update">Could not update cart.</string>
+    <string name="cart_err_remove">Could not remove item.</string>
+
+    <string name="repo_err_username_empty">Enter a username.</string>
+    <string name="repo_err_email_invalid">Invalid email.</string>
+    <string name="repo_err_email_taken">That email is already registered.</string>
+    <string name="repo_err_username_taken">That username is already taken.</string>
+    <string name="repo_err_fill_login">Enter email and password.</string>
+    <string name="repo_err_bad_credentials">Incorrect email or password.</string>
+    <string name="repo_err_account_not_found">Account not found.</string>
+    <string name="repo_err_new_password_empty">Enter a new password.</string>
+    <string name="repo_err_wrong_current_password">Current password is incorrect.</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_tap_to_change">Tap to change</string>
+    <string name="settings_choose_language">Choose language</string>
+    <string name="language_name_es">Spanish</string>
+    <string name="language_name_en">English</string>
+
+    <string name="api_cat_electronics">Electronics</string>
+    <string name="api_cat_jewelry">Jewelry</string>
+    <string name="api_cat_mens_clothing">Men\'s clothing</string>
+    <string name="api_cat_womens_clothing">Women\'s clothing</string>
+    <string name="catalog_api_fallback_error">Could not load from API. Showing local catalog.</string>
+</resources>

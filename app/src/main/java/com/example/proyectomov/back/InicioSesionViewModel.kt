@@ -1,6 +1,7 @@
 package com.example.proyectomov.back
 
 import android.app.Application
+import com.example.proyectomov.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -33,7 +34,7 @@ class InicioSesionViewModel(
         val correoOk = correo.isNotBlank()
         val passOk = contrasena.isNotBlank()
         if (!correoOk || !passOk) {
-            mensajeError = "Completa correo y contraseña"
+            mensajeError = getApplication<Application>().getString(R.string.err_fill_email_password)
             alTerminar(false)
         } else {
             viewModelScope.launch {
@@ -47,11 +48,12 @@ class InicioSesionViewModel(
                     val u = resultado.getOrThrow()
                     usuarioSesionId = u.id
                     tokenSesion = "local-${u.id}"
+                    cuentasRepository.guardarSesionUsuarioId(u.id)
                     alTerminar(true)
                 } else {
                     mensajeError =
                         resultado.exceptionOrNull()?.localizedMessage?.ifBlank { null }
-                            ?: "No se pudo iniciar sesion."
+                            ?: getApplication<Application>().getString(R.string.err_login_generic)
                     usuarioSesionId = null
                     tokenSesion = ""
                     alTerminar(false)

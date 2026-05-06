@@ -1,21 +1,26 @@
 package com.example.proyectomov
 
+import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import com.example.proyectomov.back.local.PreferenciasIdiomaApp
 import com.example.proyectomov.front.NavegacionVintageOutlet
 import com.example.proyectomov.ui.theme.ProyectoMovTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        PreferenciasIdiomaApp.aplicarSiGuardado(this)
         super.onCreate(savedInstanceState)
         SingletonImageLoader.setSafe { ctx ->
             ImageLoader.Builder(ctx)
@@ -24,13 +29,20 @@ class MainActivity : ComponentActivity() {
                 }
                 .build()
         }
-        enableEdgeToEdge()
+        // Edge-to-edge + HWUI/JankTracker en algunos emuladores (API ≤33) pueden provocar asserts
+        // "Impossible totalDuration 0" en el RenderThread; en API 34+ el marco suele comportarse mejor.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            enableEdgeToEdge()
+        }
         setContent {
-            ProyectoMovTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NavegacionVintageOutlet(
-                        innerPadding = innerPadding
-                    )
+            val locales = LocalConfiguration.current.locales
+            key(locales[0]?.toLanguageTag().orEmpty()) {
+                ProyectoMovTheme {
+                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        NavegacionVintageOutlet(
+                            innerPadding = innerPadding,
+                        )
+                    }
                 }
             }
         }

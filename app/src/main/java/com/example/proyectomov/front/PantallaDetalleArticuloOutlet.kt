@@ -36,9 +36,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -50,6 +50,7 @@ import com.example.proyectomov.back.FondoCrema
 import com.example.proyectomov.back.GrisSecundario
 import com.example.proyectomov.back.OlivaVintage
 import com.example.proyectomov.back.ProductoImagenConShimmerOutlet
+import com.example.proyectomov.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,13 +73,16 @@ fun PantallaDetalleArticuloOutlet(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Detalle de Artículo",
+                        stringResource(R.string.title_article_detail),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.cd_back),
+                        )
                     }
                 },
             )
@@ -120,7 +124,7 @@ fun PantallaDetalleArticuloOutlet(
                         Icon(Icons.Default.ShoppingBag, contentDescription = null, tint = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "Añadir al Carrito",
+                            stringResource(R.string.add_to_cart),
                             color = Color.White,
                             style = MaterialTheme.typography.labelLarge,
                         )
@@ -137,7 +141,7 @@ fun PantallaDetalleArticuloOutlet(
                 ) {
                     Icon(
                         imageVector = if (esFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "Favorito",
+                        contentDescription = stringResource(R.string.cd_favorite),
                         tint = if (esFavorito) OlivaVintage else GrisSecundario,
                     )
                 }
@@ -183,7 +187,7 @@ fun PantallaDetalleArticuloOutlet(
                         .padding(12.dp),
                 ) {
                     Text(
-                        "PRECIO FINAL",
+                        stringResource(R.string.price_final_label),
                         style = MaterialTheme.typography.labelMedium,
                         color = GrisSecundario,
                     )

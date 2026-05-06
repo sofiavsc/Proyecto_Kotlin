@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.example.proyectomov.back.FondoCrema
 import com.example.proyectomov.back.GrisSecundario
 import com.example.proyectomov.back.OlivaVintage
+import com.example.proyectomov.R
 
 @Composable
 fun PantallaBienvenidaOutlet(
@@ -38,7 +40,7 @@ fun PantallaBienvenidaOutlet(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Vintage Outlet",
+            text = stringResource(R.string.brand_title),
             style = MaterialTheme.typography.displayLarge.copy(
                 fontStyle = FontStyle.Italic,
             ),
@@ -47,7 +49,7 @@ fun PantallaBienvenidaOutlet(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Compra y vende piezas con historia",
+            text = stringResource(R.string.welcome_tagline),
             color = GrisSecundario,
             style = MaterialTheme.typography.bodyMedium,
         )
@@ -60,7 +62,7 @@ fun PantallaBienvenidaOutlet(
             colors = ButtonDefaults.buttonColors(containerColor = OlivaVintage),
         ) {
             Text(
-                text = "INICIAR SESION",
+                text = stringResource(R.string.btn_sign_in),
                 color = Color.White,
                 style = MaterialTheme.typography.labelLarge,
             )
@@ -74,7 +76,7 @@ fun PantallaBienvenidaOutlet(
             colors = ButtonDefaults.outlinedButtonColors(contentColor = OlivaVintage),
         ) {
             Text(
-                text = "REGISTRARSE",
+                text = stringResource(R.string.btn_register),
                 style = MaterialTheme.typography.labelLarge,
             )
         }

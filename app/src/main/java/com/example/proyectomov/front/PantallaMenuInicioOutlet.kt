@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -59,6 +58,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -67,9 +68,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.proyectomov.back.ArticuloOutlet
+import com.example.proyectomov.back.MapeoCategoriaApi
 import com.example.proyectomov.back.CarritoViewModel
 import com.example.proyectomov.back.CategoriaDestacadaOutlet
 import com.example.proyectomov.back.ItemCarritoOutlet
@@ -79,13 +83,14 @@ import com.example.proyectomov.back.GrisSecundario
 import com.example.proyectomov.back.OlivaVintage
 import com.example.proyectomov.back.OlivaVintageOscuro
 import com.example.proyectomov.back.ProductoImagenConShimmerOutlet
+import com.example.proyectomov.R
 import java.util.Locale
 import kotlin.collections.chunked
 import kotlin.collections.forEach
 
 private const val ARTICULOS_INICIO_MAX = 10
 
-private enum class TabBarraOutlet {
+internal enum class TabBarraOutlet {
     Explorar,
     Deseos,
     Vender,
@@ -93,7 +98,7 @@ private enum class TabBarraOutlet {
     Perfil,
 }
 
-private inline fun <reified T : Any> navegarTabInferior(
+internal inline fun <reified T : Any> navegarTabInferior(
     navController: NavHostController,
     ruta: T,
 ) {
@@ -153,6 +158,7 @@ fun PantallaMenuInicioOutlet(
     var mostrarFiltroCategorias by remember { mutableStateOf(false) }
     val hayBusquedaActiva = textoBusqueda.trim().isNotEmpty()
     val hayFiltroCategoriaActivo = categoriasSeleccionadas.isNotEmpty()
+    val recursos = LocalContext.current.resources
     val locale = Locale.getDefault()
     val todasLasCategorias = remember(articulos) {
         articulos
@@ -184,8 +190,8 @@ fun PantallaMenuInicioOutlet(
                 onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
                 onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
-                onBolsa = { navegarTabInferior(navController, RutaCarritoOutlet) },
-                onPerfil = { },
+                onBolsa = onIrCarrito,
+                onPerfil = { navegarTabInferior(navController, RutaPerfilOutlet) },
             )
         },
     ) { padding ->
@@ -211,19 +217,21 @@ fun PantallaMenuInicioOutlet(
                             .padding(horizontal = 8.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        IconButton(onClick = { /* avance */ }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menú")
+                        IconButton(onClick = { navController.navigate(RutaAjustesOutlet) }) {
+                            Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.cd_menu))
                         }
                         Text(
-                            text = "Vintage Outlet",
+                            text = stringResource(R.string.brand_title),
                             modifier = Modifier.weight(1f),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontStyle = FontStyle.Italic,
                             ),
                         )
-                        IconButton(onClick = { /* avance */ }) {
-                            Icon(Icons.Default.Person, contentDescription = "Perfil")
+                        IconButton(
+                            onClick = { navegarTabInferior(navController, RutaPerfilOutlet) },
+                        ) {
+                            Icon(Icons.Default.Person, contentDescription = stringResource(R.string.cd_profile))
                         }
                     }
                     Row(
@@ -237,7 +245,9 @@ fun PantallaMenuInicioOutlet(
                             value = textoBusqueda,
                             onValueChange = { textoBusqueda = it },
                             modifier = Modifier.weight(1f),
-                            placeholder = { Text("Buscar tesoros vintage...", color = GrisSecundario) },
+                            placeholder = {
+                                Text(stringResource(R.string.search_placeholder), color = GrisSecundario)
+                            },
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                             singleLine = true,
                             shape = RoundedCornerShape(24.dp),
@@ -255,7 +265,11 @@ fun PantallaMenuInicioOutlet(
                                     .clickable { mostrarFiltroCategorias = !mostrarFiltroCategorias },
                                 contentAlignment = Alignment.Center,
                             ) {
-                                Icon(Icons.Default.FilterList, contentDescription = "Filtro", tint = Color.White)
+                                Icon(
+                                    Icons.Default.FilterList,
+                                    contentDescription = stringResource(R.string.cd_filter),
+                                    tint = Color.White,
+                                )
                             }
                             DropdownMenu(
                                 expanded = mostrarFiltroCategorias,
@@ -264,7 +278,9 @@ fun PantallaMenuInicioOutlet(
                             ) {
                                 if (hayFiltroCategoriaActivo) {
                                     DropdownMenuItem(
-                                        text = { Text("Quitar filtros", color = OlivaVintage) },
+                                        text = {
+                                            Text(stringResource(R.string.clear_filters), color = OlivaVintage)
+                                        },
                                         onClick = {
                                             categoriasSeleccionadas = emptySet()
                                         },
@@ -272,7 +288,9 @@ fun PantallaMenuInicioOutlet(
                                 }
                                 if (todasLasCategorias.isEmpty()) {
                                     DropdownMenuItem(
-                                        text = { Text("Sin categorías", color = GrisSecundario) },
+                                        text = {
+                                            Text(stringResource(R.string.no_categories), color = GrisSecundario)
+                                        },
                                         onClick = { },
                                         enabled = false,
                                     )
@@ -282,7 +300,11 @@ fun PantallaMenuInicioOutlet(
                                             it.equals(categoria, ignoreCase = true)
                                         }
                                         DropdownMenuItem(
-                                            text = { Text(categoria) },
+                                            text = {
+                                                Text(
+                                                    MapeoCategoriaApi.etiquetaMostrar(recursos, categoria),
+                                                )
+                                            },
                                             onClick = {
                                                 categoriasSeleccionadas = if (marcada) {
                                                     categoriasSeleccionadas.filterNot {
@@ -314,7 +336,7 @@ fun PantallaMenuInicioOutlet(
                     ) {
             item {
                 Text(
-                    text = "CATEGORÍAS",
+                    text = stringResource(R.string.section_categories),
                     color = OlivaVintage,
                         style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
@@ -362,17 +384,20 @@ fun PantallaMenuInicioOutlet(
                 ) {
                     Text(
                         when {
-                            hayBusquedaActiva && hayFiltroCategoriaActivo -> "RESULTADOS"
-                            hayBusquedaActiva -> "RESULTADOS DE BÚSQUEDA"
-                            hayFiltroCategoriaActivo -> "ARTÍCULOS POR CATEGORÍA"
-                            else -> "ÚLTIMOS ARTÍCULOS"
+                            hayBusquedaActiva && hayFiltroCategoriaActivo ->
+                                stringResource(R.string.subtitle_results_both)
+                            hayBusquedaActiva ->
+                                stringResource(R.string.subtitle_results_search)
+                            hayFiltroCategoriaActivo ->
+                                stringResource(R.string.subtitle_results_category)
+                            else -> stringResource(R.string.subtitle_latest)
                         },
                         color = OlivaVintage,
                         style = MaterialTheme.typography.labelMedium,
                     )
                     if (!hayBusquedaActiva && !hayFiltroCategoriaActivo) {
                         Text(
-                            "VER TODO",
+                            stringResource(R.string.see_all),
                             style = MaterialTheme.typography.labelSmall,
                             textDecoration = TextDecoration.Underline,
                             color = OlivaVintage,
@@ -387,11 +412,11 @@ fun PantallaMenuInicioOutlet(
                 item {
                     Text(
                         text = if (hayBusquedaActiva && hayFiltroCategoriaActivo) {
-                            "No hay artículos que coincidan con la búsqueda y las categorías."
+                            stringResource(R.string.empty_no_match_both)
                         } else if (hayBusquedaActiva) {
-                            "No hay artículos que coincidan con tu búsqueda."
+                            stringResource(R.string.empty_no_match_search)
                         } else {
-                            "No hay artículos en las categorías seleccionadas."
+                            stringResource(R.string.empty_no_match_category)
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = GrisSecundario,
@@ -457,13 +482,16 @@ fun PantallaCatalogoCompletoOutlet(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Todos los artículos",
+                        stringResource(R.string.title_all_items),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.cd_back),
+                        )
                     }
                 },
             )
@@ -474,8 +502,8 @@ fun PantallaCatalogoCompletoOutlet(
                 onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
                 onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
-                onBolsa = { navegarTabInferior(navController, RutaCarritoOutlet) },
-                onPerfil = { },
+                onBolsa = onIrCarrito,
+                onPerfil = { navegarTabInferior(navController, RutaPerfilOutlet) },
             )
         },
     ) { padding ->
@@ -535,17 +563,6 @@ fun PantallaCatalogoCompletoOutlet(
     }
 }
 
-private fun tituloCategoriaParaBarra(raw: String): String {
-    if (raw.isBlank()) return raw
-    val partes = raw.split(" ", "-").filter { it.isNotEmpty() }
-    if (partes.isEmpty()) return raw.replaceFirstChar { it.uppercaseChar() }
-    return partes.joinToString(" ") { token ->
-        token.replaceFirstChar { ch ->
-            if (ch.isLowerCase()) ch.titlecase(Locale.getDefault()) else ch.toString()
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaCatalogoPorCategoriaOutlet(
@@ -557,10 +574,13 @@ fun PantallaCatalogoPorCategoriaOutlet(
     onToggleFavorito: (String) -> Unit,
     onIrCarrito: () -> Unit,
 ) {
+    val recursosCat = LocalContext.current.resources
     val articulosCategoria = remember(articulos, categoria) {
         articulos.filter { it.categoria.equals(categoria, ignoreCase = true) }
     }
-    val tituloBarra = remember(categoria) { tituloCategoriaParaBarra(categoria) }
+    val tituloBarra = remember(categoria, recursosCat) {
+        MapeoCategoriaApi.etiquetaMostrar(recursosCat, categoria)
+    }
     Scaffold(
         containerColor = Color.White,
         topBar = {
@@ -573,7 +593,10 @@ fun PantallaCatalogoPorCategoriaOutlet(
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.cd_back),
+                        )
                     }
                 },
             )
@@ -584,8 +607,8 @@ fun PantallaCatalogoPorCategoriaOutlet(
                 onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
                 onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
-                onBolsa = { navegarTabInferior(navController, RutaCarritoOutlet) },
-                onPerfil = { },
+                onBolsa = onIrCarrito,
+                onPerfil = { navegarTabInferior(navController, RutaPerfilOutlet) },
             )
         },
     ) { padding ->
@@ -601,7 +624,7 @@ fun PantallaCatalogoPorCategoriaOutlet(
                 )
             } else if (articulosCategoria.isEmpty()) {
                 Text(
-                    text = "No hay artículos en esta categoría.",
+                    text = stringResource(R.string.title_no_items_category),
                     style = MaterialTheme.typography.bodyMedium,
                     color = GrisSecundario,
                     modifier = Modifier
@@ -673,8 +696,8 @@ fun PantallaFavoritosOutlet(
                 onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
                 onDeseos = { },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
-                onBolsa = { navegarTabInferior(navController, RutaCarritoOutlet) },
-                onPerfil = { },
+                onBolsa = onIrCarrito,
+                onPerfil = { navegarTabInferior(navController, RutaPerfilOutlet) },
             )
         },
     ) { padding ->
@@ -688,7 +711,7 @@ fun PantallaFavoritosOutlet(
         ) {
             item {
                 Text(
-                    text = "ARTÍCULOS FAVORITOS",
+                    text = stringResource(R.string.title_favorite_items),
                     color = OlivaVintage,
                     style = MaterialTheme.typography.titleMedium,
                 )
@@ -697,7 +720,7 @@ fun PantallaFavoritosOutlet(
             if (articulosFavoritos.isEmpty()) {
                 item {
                     Text(
-                        text = "Aún no tienes artículos en favoritos.",
+                        text = stringResource(R.string.empty_favorites),
                         style = MaterialTheme.typography.bodyMedium,
                         color = GrisSecundario,
                     )
@@ -748,7 +771,7 @@ fun PantallaCarritoOutlet(
                 onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
                 onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
                 onBolsa = { },
-                onPerfil = { },
+                onPerfil = { navegarTabInferior(navController, RutaPerfilOutlet) },
             )
         },
     ) { padding ->
@@ -771,7 +794,7 @@ fun PantallaCarritoOutlet(
                 ) {
                     item {
                         Text(
-                            text = "TU CARRITO",
+                            text = stringResource(R.string.title_your_cart),
                             color = OlivaVintage,
                             style = MaterialTheme.typography.titleMedium,
                         )
@@ -788,7 +811,7 @@ fun PantallaCarritoOutlet(
                     if (lineas.isEmpty() && errorMsg.isEmpty()) {
                         item {
                             Text(
-                                text = "Tu carrito está vacío.",
+                                text = stringResource(R.string.empty_cart),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = GrisSecundario,
                             )
@@ -829,7 +852,8 @@ private fun TarjetaCarritoLineaOutlet(
     onIrDetalle: () -> Unit,
     onQuitar: () -> Unit,
 ) {
-    val titulo = articulo?.titulo ?: "Producto #${linea.productId}"
+    val titulo = articulo?.titulo
+        ?: stringResource(R.string.product_fallback, linea.productId)
     val imagenUrl = articulo?.imagenUrl.orEmpty()
     val precioTexto = articulo?.let { "$${it.precioPesosEntero}.00" } ?: "—"
 
@@ -887,7 +911,7 @@ private fun TarjetaCarritoLineaOutlet(
             IconButton(onClick = onQuitar) {
                 Icon(
                     Icons.Default.Close,
-                    contentDescription = "Quitar del carrito",
+                    contentDescription = stringResource(R.string.cd_remove_from_cart),
                     tint = GrisSecundario,
                 )
             }
@@ -931,7 +955,7 @@ private fun TarjetaFavoritoOutlet(
                     maxLines = 2,
                 )
                 Text(
-                    text = "ID: ${articulo.idMostrar}",
+                    text = stringResource(R.string.id_label_format, articulo.idMostrar),
                     style = MaterialTheme.typography.labelSmall,
                     color = GrisSecundario,
                 )
@@ -943,7 +967,7 @@ private fun TarjetaFavoritoOutlet(
             }
             Icon(
                 imageVector = Icons.Default.Favorite,
-                contentDescription = "Favorito",
+                contentDescription = stringResource(R.string.cd_favorite),
                 tint = OlivaVintage,
             )
         }
@@ -987,14 +1011,14 @@ private fun TarjetaPolaroidOutlet(
                 ) {
                     Icon(
                         imageVector = if (esFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "Favorito",
+                        contentDescription = stringResource(R.string.cd_favorite),
                         tint = if (esFavorito) OlivaVintage else GrisSecundario,
                     )
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "ID: ${articulo.idMostrar}",
+                stringResource(R.string.id_label_format, articulo.idMostrar),
                 style = MaterialTheme.typography.labelSmall,
                 color = GrisSecundario,
             )
@@ -1013,14 +1037,12 @@ private fun TarjetaPolaroidOutlet(
 }
 
 @Composable
-private fun BarraNavegacionInferiorOutlet(
+internal fun BarraNavegacionInferiorOutlet(
     tabSeleccionada: TabBarraOutlet,
     onExplorar: () -> Unit,
     onDeseos: () -> Unit,
     onVender: () -> Unit,
-    onBolsa: (
-
-            ) -> Unit,
+    onBolsa: () -> Unit,
     onPerfil: () -> Unit,
 ) {
     Row(
@@ -1029,62 +1051,73 @@ private fun BarraNavegacionInferiorOutlet(
             .background(Color.White)
             .border(1.dp, GrisBordeCampo)
             .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ItemBarraInferior(
-            "EXPLORAR",
+            stringResource(R.string.nav_explore),
             Icons.Default.Explore,
             seleccionado = tabSeleccionada == TabBarraOutlet.Explorar,
             onClick = onExplorar,
+            modifier = Modifier.weight(1f),
         )
         ItemBarraInferior(
-            "DESEOS",
+            stringResource(R.string.nav_wishlist),
             Icons.Default.FavoriteBorder,
             seleccionado = tabSeleccionada == TabBarraOutlet.Deseos,
             onClick = onDeseos,
+            modifier = Modifier.weight(1f),
         )
         ItemBarraInferior(
-            "VENDER",
+            stringResource(R.string.nav_sell),
             Icons.Default.Add,
             seleccionado = tabSeleccionada == TabBarraOutlet.Vender,
             onClick = onVender,
+            modifier = Modifier.weight(1f),
         )
         ItemBarraInferior(
-            "BOLSA",
+            stringResource(R.string.nav_bag),
             Icons.Default.ShoppingBag,
             seleccionado = tabSeleccionada == TabBarraOutlet.Bolsa,
             onClick = onBolsa,
+            modifier = Modifier.weight(1f),
         )
         ItemBarraInferior(
-            "PERFIL",
+            stringResource(R.string.nav_profile_bar),
             Icons.Default.Person,
             seleccionado = tabSeleccionada == TabBarraOutlet.Perfil,
             onClick = onPerfil,
+            modifier = Modifier.weight(1f),
         )
     }
 }
 
 @Composable
-private fun ItemBarraInferior(
+internal fun ItemBarraInferior(
     etiqueta: String,
     icono: ImageVector,
     seleccionado: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val color = if (seleccionado) OlivaVintageOscuro else GrisSecundario
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .width(56.dp)
+        modifier = modifier
+            .fillMaxWidth()
             .clickable { onClick() },
     ) {
-        Icon(icono, contentDescription = etiqueta, tint = color, modifier = Modifier.size(28.dp))
+        Icon(icono, contentDescription = etiqueta, tint = color, modifier = Modifier.size(26.dp))
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             etiqueta,
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.sp,
+                lineHeight = 11.sp,
+            ),
             color = color,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Clip,
         )
     }
 }

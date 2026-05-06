@@ -1,10 +1,12 @@
 package com.example.proyectomov.back
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.proyectomov.R
 import com.example.proyectomov.back.api.ApiClient
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -12,8 +14,12 @@ import java.util.Date
 import java.util.Locale
 
 class CarritoViewModel(
-    private val repository: CarritoRepository = CarritoRepository(ApiClient.fakeStoreApi),
-) : ViewModel() {
+    application: Application,
+) : AndroidViewModel(application) {
+
+    private val repository: CarritoRepository = CarritoRepository(ApiClient.fakeStoreApi)
+
+    private fun str(id: Int) = getApplication<Application>().getString(id)
     var carritoActivo by mutableStateOf<CarritoOutlet?>(null)
         private set
 
@@ -67,11 +73,11 @@ class CarritoViewModel(
                             idCarritoSesion = guardado.id
                             carritoActivo = guardado
                             operando = false
-                            alResultado(true, "Artículo añadido al carrito.")
+                            alResultado(true, str(R.string.msg_cart_added))
                         },
                         onFailure = { ex ->
                             operando = false
-                            error = ex.message ?: "No se pudo crear el carrito."
+                            error = ex.message ?: str(R.string.cart_err_create)
                             alResultado(false, error)
                         },
                     )
@@ -90,7 +96,7 @@ class CarritoViewModel(
 
             if (base.productos.any { it.productId == productId }) {
                 operando = false
-                alResultado(true, "Ya está en tu carrito.")
+                alResultado(true, str(R.string.msg_cart_already))
                 return@launch
             }
 
@@ -103,11 +109,11 @@ class CarritoViewModel(
                         idCarritoSesion = guardado.id
                         carritoActivo = guardado
                         operando = false
-                        alResultado(true, "Artículo añadido al carrito.")
+                        alResultado(true, str(R.string.msg_cart_added))
                     },
                     onFailure = { ex ->
                         operando = false
-                        error = ex.message ?: "No se pudo actualizar el carrito."
+                        error = ex.message ?: str(R.string.cart_err_update)
                         alResultado(false, error)
                     },
                 )
@@ -139,7 +145,7 @@ class CarritoViewModel(
                 },
                 onFailure = { ex ->
                     operando = false
-                    error = ex.message ?: "No se pudo quitar el artículo."
+                    error = ex.message ?: str(R.string.cart_err_remove)
                 },
             )
         }

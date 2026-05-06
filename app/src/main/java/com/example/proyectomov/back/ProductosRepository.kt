@@ -7,10 +7,6 @@ import com.example.proyectomov.back.api.ProductUpsertDto
 class ProductosRepository(
     private val api: FakeStoreApiService,
 ) {
-    suspend fun obtenerProductos(): Result<List<ArticuloOutlet>> = runCatching {
-        api.getProducts(limit = null).map { it.toArticuloOutlet() }
-    }
-
     /**
      * Une lista general (con [limit] alto) + productos por cada categoría y elimina duplicados por id.
      * Así el catálogo refleja todo lo que la API expone, no solo los ~20 del GET /products por defecto.
@@ -39,16 +35,8 @@ class ProductosRepository(
         porId.values.sortedBy { it.idMostrar }
     }
 
-    suspend fun obtenerProducto(id: Int): Result<ArticuloOutlet> = runCatching {
-        api.getProduct(id).toArticuloOutlet()
-    }
-
     suspend fun obtenerCategorias(): Result<List<String>> = runCatching {
         api.getCategories()
-    }
-
-    suspend fun obtenerProductosPorCategoria(categoria: String): Result<List<ArticuloOutlet>> = runCatching {
-        api.getProductsByCategory(categoria).map { it.toArticuloOutlet() }
     }
 
     suspend fun crearProducto(
@@ -67,30 +55,6 @@ class ProductosRepository(
                 category = categoria,
             ),
         ).toArticuloOutlet()
-    }
-
-    suspend fun actualizarProducto(
-        id: Int,
-        titulo: String,
-        precio: Double,
-        descripcion: String,
-        imagen: String,
-        categoria: String,
-    ): Result<ArticuloOutlet> = runCatching {
-        api.updateProduct(
-            id = id,
-            body = ProductUpsertDto(
-                title = titulo,
-                price = precio,
-                description = descripcion,
-                image = imagen,
-                category = categoria,
-            ),
-        ).toArticuloOutlet()
-    }
-
-    suspend fun eliminarProducto(id: Int): Result<ArticuloOutlet> = runCatching {
-        api.deleteProduct(id).toArticuloOutlet()
     }
 }
 

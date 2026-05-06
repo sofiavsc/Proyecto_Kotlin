@@ -31,6 +31,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.ImeAction
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.example.proyectomov.back.GrisBordeCampo
 import com.example.proyectomov.back.GrisSecundario
 import com.example.proyectomov.back.OlivaVintage
+import com.example.proyectomov.R
 import com.example.proyectomov.back.RegistroViewModel
 import com.example.proyectomov.ui.theme.ProyectoMovTheme
 
@@ -86,10 +88,13 @@ private fun PantallaRegistroOutletContenido(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onVolver) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atras")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.cd_back),
+                )
             }
             Text(
-                text = "Registro",
+                text = stringResource(R.string.register_title),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(start = 8.dp),
             )
@@ -97,14 +102,14 @@ private fun PantallaRegistroOutletContenido(
 
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = "Crea tu cuenta para comprar y vender piezas vintage.",
+            text = stringResource(R.string.register_subtitle),
             color = GrisSecundario,
             style = MaterialTheme.typography.bodyMedium,
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text("USERNAME", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.field_username), style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
@@ -119,7 +124,7 @@ private fun PantallaRegistroOutletContenido(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("EMAIL", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.field_email), style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = correo,
             onValueChange = { correo = it },
@@ -139,7 +144,7 @@ private fun PantallaRegistroOutletContenido(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("CONTRASENA", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.field_password), style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = contrasena,
             onValueChange = { contrasena = it },
@@ -154,7 +159,7 @@ private fun PantallaRegistroOutletContenido(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("CONFIRMAR CONTRASENA", style = MaterialTheme.typography.labelMedium)
+        Text(stringResource(R.string.field_confirm_password), style = MaterialTheme.typography.labelMedium)
         OutlinedTextField(
             value = confirmarContrasena,
             onValueChange = { confirmarContrasena = it },
@@ -192,7 +197,11 @@ private fun PantallaRegistroOutletContenido(
             shape = RoundedCornerShape(6.dp),
         ) {
             Text(
-                text = if (procesando) "REGISTRANDO..." else "CREAR CUENTA",
+                text = if (procesando) {
+                    stringResource(R.string.registering)
+                } else {
+                    stringResource(R.string.create_account)
+                },
                 color = Color.White,
                 style = MaterialTheme.typography.labelLarge,
             )
@@ -204,9 +213,9 @@ private fun PantallaRegistroOutletContenido(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
         ) {
-            Text("Ya tienes cuenta? ", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.have_account), style = MaterialTheme.typography.bodyMedium)
             Text(
-                text = "Inicia sesion",
+                text = stringResource(R.string.sign_in_prompt),
                 color = OlivaVintage,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.clickable { onVolver() },

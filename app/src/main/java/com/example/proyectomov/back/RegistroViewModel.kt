@@ -1,6 +1,7 @@
 package com.example.proyectomov.back
 
 import android.app.Application
+import com.example.proyectomov.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -30,11 +31,12 @@ class RegistroViewModel(
         val passValida = contrasena.length >= 3
         val passIguales = contrasena == confirmarContrasena
 
+        val app = getApplication<Application>()
         mensajeError = when {
-            username.isBlank() -> "Escribe un username."
-            !correoValido -> "Correo no valido."
-            !passValida -> "La contrasena debe tener al menos 3 caracteres."
-            !passIguales -> "Las contrasenas no coinciden."
+            username.isBlank() -> app.getString(R.string.err_username_empty)
+            !correoValido -> app.getString(R.string.err_email_invalid)
+            !passValida -> app.getString(R.string.err_password_short)
+            !passIguales -> app.getString(R.string.err_passwords_mismatch)
             else -> ""
         }
 
@@ -55,7 +57,7 @@ class RegistroViewModel(
                 alTerminar(true)
             } else {
                 mensajeError = resultado.exceptionOrNull()?.localizedMessage?.ifBlank { null }
-                    ?: "No se pudo registrar."
+                    ?: getApplication<Application>().getString(R.string.err_register_failed)
                 alTerminar(false)
             }
         }
