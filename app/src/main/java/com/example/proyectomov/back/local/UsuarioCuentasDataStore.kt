@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -31,13 +32,13 @@ class UsuarioCuentasDataStore(context: Context) {
         }
     }
 
-    suspend fun leerSesionUsuarioId(): Int? =
-        dataStore.data
-            .map { prefs ->
-                val v = prefs[KEY_SESION_USUARIO_ID] ?: return@map null
-                if (v <= 0) null else v
-            }
-            .first()
+    fun flujoSesionUsuarioId(): Flow<Int?> =
+        dataStore.data.map { prefs ->
+            val v = prefs[KEY_SESION_USUARIO_ID] ?: return@map null
+            if (v <= 0) null else v
+        }
+
+    suspend fun leerSesionUsuarioId(): Int? = flujoSesionUsuarioId().first()
 
     suspend fun guardarSesionUsuarioId(id: Int?) {
         dataStore.edit { prefs ->

@@ -7,6 +7,7 @@ import com.example.proyectomov.back.local.contextoLocalizadoApp
 import com.example.proyectomov.back.local.PasswordHasher
 import com.example.proyectomov.back.local.UsuarioCuentaStored
 import com.example.proyectomov.back.local.UsuarioCuentasDataStore
+import kotlinx.coroutines.flow.Flow
 
 class UsuarioCuentasRepository(
     context: Context,
@@ -68,6 +69,8 @@ class UsuarioCuentasRepository(
 
         encontrado.aUsuarioOutlet()
     }
+
+    fun sesionUsuarioIdFlow(): Flow<Int?> = dataStore.flujoSesionUsuarioId()
 
     suspend fun obtenerSesionUsuarioId(): Int? = dataStore.leerSesionUsuarioId()
 
