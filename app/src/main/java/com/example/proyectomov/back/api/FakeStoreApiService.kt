@@ -8,7 +8,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface FakeStoreApiService {
-    /** [limit] opcional: la API admite query `limit` para pedir más filas (p. ej. 100). */
     @GET("products")
     suspend fun getProducts(@Query("limit") limit: Int? = null): List<ProductDto>
 

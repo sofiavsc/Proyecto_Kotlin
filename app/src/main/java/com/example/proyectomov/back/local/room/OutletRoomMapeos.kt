@@ -26,9 +26,6 @@ internal fun ProductoCatalogoOutletEntity.aArticuloOutlet(): ArticuloOutlet =
         calificacionEstrellas = calificacionEstrellas,
     )
 
-/**
- * El API usa [ProductDto.id] numérico mapeado a [ArticuloOutlet.idMostrar] con ceros a la izquierda.
- */
 private fun ArticuloOutlet.idRemotoEstimado(): Int {
     val sinCeros = idMostrar.trimStart('0').ifEmpty { "0" }
     return sinCeros.toIntOrNull() ?: idMostrar.hashCode()

@@ -13,10 +13,6 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.proyectomov.R
 
-/**
- * [AsyncImage] con [ImageRequest] para que Coil calcule el tamaño según el layout.
- * Solo [String] con rememberAsyncImagePainter no infiere tamaño y falla con frecuencia.
- */
 @Composable
 fun ProductoImagenConShimmerOutlet(
     imagenUrl: String,
@@ -39,7 +35,6 @@ fun ProductoImagenConShimmerOutlet(
     val request: ImageRequest = remember(url, context) {
         ImageRequest.Builder(context)
             .data(url)
-            // Evita animación de alcance ~0 ms que en emuladores dispara asserts en JankTracker/HWUI.
             .crossfade(false)
             .build()
     }

@@ -44,7 +44,6 @@ object RutaBienvenidaOutlet
 @Serializable
 object RutaRegistroOutlet
 
-/** Menú principal (pantalla imagen 3). */
 @Serializable
 object RutaMenuInicioOutlet
 
@@ -57,7 +56,6 @@ object RutaCarritoOutlet
 @Serializable
 object RutaAgregarArticuloOutlet
 
-/** Perfil del usuario (cuenta local). */
 @Serializable
 object RutaPerfilOutlet
 
@@ -295,10 +293,6 @@ fun NavegacionVintageOutlet(innerPadding: PaddingValues = PaddingValues(0.dp)) {
     }
 }
 
-/**
- * En el Preview, [LocalInspectionMode] está activo y [NavegacionVintageOutlet]
- * solo pinta la bienvenida (sin NavHost ni ViewModels).
- */
 @Preview(showBackground = true, name = "Navegacion · bienvenida")
 @Composable
 private fun NavegacionVintageOutletPreview() {

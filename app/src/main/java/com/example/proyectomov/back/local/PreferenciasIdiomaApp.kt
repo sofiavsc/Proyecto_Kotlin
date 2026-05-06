@@ -7,9 +7,6 @@ import android.os.LocaleList
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 
-/**
- * Persiste español / inglés y aplica [AppCompatDelegate.setApplicationLocales] al arranque.
- */
 object PreferenciasIdiomaApp {
 
     private const val PREFS = "vintage_outlet_app_prefs"
@@ -36,9 +33,6 @@ object PreferenciasIdiomaApp {
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
     }
 
-    /**
-     * Resuelve "es" o "en" para mostrar en UI (preferencia guardada, delegado de AppCompat o sistema).
-     */
     fun tagIdiomaResuelto(context: Context): String {
         obtenerTagGuardado(context)?.let { return it }
         val app = AppCompatDelegate.getApplicationLocales()
@@ -53,10 +47,6 @@ object PreferenciasIdiomaApp {
     }
 }
 
-/**
- * Misma configuración de idioma que la UI ([AppCompatDelegate] / preferencia guardada).
- * [android.app.Application.getString] suele usar solo el idioma del sistema.
- */
 fun Context.contextoLocalizadoApp(): Context {
     val base = applicationContext
     val locales: LocaleListCompat = when {

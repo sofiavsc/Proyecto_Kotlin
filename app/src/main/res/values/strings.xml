@@ -2,7 +2,6 @@
 <resources>
     <string name="app_name">Vintage Outlet</string>
 
-    <!-- Accesibilidad -->
     <string name="cd_back">Atrás</string>
     <string name="cd_menu">Menú</string>
     <string name="cd_profile">Perfil</string>
@@ -11,7 +10,6 @@
     <string name="cd_remove_from_cart">Quitar del carrito</string>
     <string name="cd_edit_field">Editar %1$s</string>
 
-    <!-- Inicio / búsqueda -->
     <string name="brand_title">Vintage Outlet</string>
     <string name="search_placeholder">Buscar tesoros vintage…</string>
     <string name="clear_filters">Quitar filtros</string>
@@ -26,11 +24,9 @@
     <string name="empty_no_match_search">No hay artículos que coincidan con tu búsqueda.</string>
     <string name="empty_no_match_category">No hay artículos en las categorías seleccionadas.</string>
 
-    <!-- Catálogo -->
     <string name="title_all_items">Todos los artículos</string>
     <string name="title_no_items_category">No hay artículos en esta categoría.</string>
 
-    <!-- Chips categoría destacada (API) -->
     <string name="cat_dest_electronics">ELECTRÓNICOS</string>
     <string name="cat_dest_jewelry">JOYERÍA</string>
     <string name="cat_dest_mens_clothing">ROPA HOMBRE</string>
@@ -39,34 +35,28 @@
     <string name="cat_chip_denim">DENIM</string>
     <string name="cat_chip_footwear">CALZADO</string>
 
-    <!-- Favoritos -->
     <string name="title_favorite_items">ARTÍCULOS FAVORITOS</string>
     <string name="empty_favorites">Aún no tienes artículos en favoritos.</string>
 
-    <!-- Carrito -->
     <string name="title_your_cart">TU CARRITO</string>
     <string name="empty_cart">Tu carrito está vacío.</string>
     <string name="product_fallback">Producto #%1$d</string>
     <string name="id_label_format">ID: %1$s</string>
 
-    <!-- Barra inferior -->
     <string name="nav_explore">EXPLORAR</string>
     <string name="nav_wishlist">DESEOS</string>
     <string name="nav_sell">VENDER</string>
     <string name="nav_bag">BOLSA</string>
     <string name="nav_profile_bar">PERFIL</string>
 
-    <!-- Detalle artículo -->
     <string name="title_article_detail">Detalle de artículo</string>
     <string name="add_to_cart">Añadir al carrito</string>
     <string name="price_final_label">PRECIO FINAL</string>
 
-    <!-- Bienvenida -->
     <string name="welcome_tagline">Compra y vende piezas con historia</string>
     <string name="btn_sign_in">INICIAR SESIÓN</string>
     <string name="btn_register">REGISTRARSE</string>
 
-    <!-- Acceso / login -->
     <string name="login_title">Iniciar sesión</string>
     <string name="hero_brand">VINTAGE OUTLET</string>
     <string name="headline_style">Redescubre tu estilo</string>
@@ -80,7 +70,6 @@
     <string name="no_account">¿No tienes cuenta? </string>
     <string name="register_here">Regístrate aquí</string>
 
-    <!-- Registro -->
     <string name="register_title">Registro</string>
     <string name="register_subtitle">Crea tu cuenta para comprar y vender piezas vintage.</string>
     <string name="field_username">USUARIO</string>
@@ -92,7 +81,6 @@
     <string name="have_account">¿Ya tienes cuenta? </string>
     <string name="sign_in_prompt">Inicia sesión</string>
 
-    <!-- Publicar artículo -->
     <string name="publish_title">Publicar artículo</string>
     <string name="publish_subtitle">Ingresa la información principal de tu prenda para crear la publicación.</string>
     <string name="pub_field_title">TÍTULO</string>
@@ -117,7 +105,6 @@
     <string name="continue_btn">CONTINUAR</string>
     <string name="pub_publish_btn">PUBLICAR</string>
 
-    <!-- Perfil -->
     <string name="profile_go_login">Ir a iniciar sesión</string>
     <string name="profile_title">Tu perfil</string>
     <string name="profile_label_user">Usuario</string>
@@ -136,10 +123,8 @@
     <string name="cancel">Cancelar</string>
     <string name="toast_new_password_mismatch">Las contraseñas nuevas no coinciden.</string>
 
-    <!-- Toasts generales -->
     <string name="toast_registration_ok">Registro exitoso</string>
 
-    <!-- Errores ViewModels / lógica -->
     <string name="err_fill_email_password">Completa correo y contraseña</string>
     <string name="err_login_generic">No se pudo iniciar sesión.</string>
     <string name="err_sign_in_for_profile">Inicia sesión para ver tu perfil.</string>
@@ -159,8 +144,10 @@
     <string name="cart_err_create">No se pudo crear el carrito.</string>
     <string name="cart_err_update">No se pudo actualizar el carrito.</string>
     <string name="cart_err_remove">No se pudo quitar el artículo.</string>
+    <string name="cart_buy">COMPRAR</string>
+    <string name="cart_total_format">Total: %1$s</string>
+    <string name="msg_purchase_success">Compra exitosa.</string>
 
-    <!-- Repository -->
     <string name="repo_err_username_empty">Escribe un usuario.</string>
     <string name="repo_err_email_invalid">Correo no válido.</string>
     <string name="repo_err_email_taken">Ese correo ya está registrado.</string>
@@ -171,7 +158,6 @@
     <string name="repo_err_new_password_empty">Escribe una contraseña nueva.</string>
     <string name="repo_err_wrong_current_password">La contraseña actual no es correcta.</string>
 
-    <!-- Ajustes / idioma -->
     <string name="settings_title">Ajustes</string>
     <string name="settings_language">Idioma</string>
     <string name="settings_tap_to_change">Toca para cambiar</string>
@@ -179,7 +165,6 @@
     <string name="language_name_es">Español</string>
     <string name="language_name_en">Inglés</string>
 
-    <!-- Categorías API (Fake Store): mismo slug interno, etiqueta según idioma -->
     <string name="api_cat_electronics">Electrónica</string>
     <string name="api_cat_jewelry">Joyería</string>
     <string name="api_cat_mens_clothing">Ropa de hombre</string>

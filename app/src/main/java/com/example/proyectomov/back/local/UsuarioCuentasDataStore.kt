@@ -31,7 +31,6 @@ class UsuarioCuentasDataStore(context: Context) {
         }
     }
 
-    /** null si no hay sesión (valor ≤ 0 o ausente). */
     suspend fun leerSesionUsuarioId(): Int? =
         dataStore.data
             .map { prefs ->

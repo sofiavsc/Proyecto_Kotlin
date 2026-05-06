@@ -1,8 +1,5 @@
 package com.example.proyectomov.back
 
-/**
- * Artículo mostrado en el inicio y al abrir detalle.
- */
 data class ArticuloOutlet(
     val idMostrar: String,
     val imagenUrl: String,

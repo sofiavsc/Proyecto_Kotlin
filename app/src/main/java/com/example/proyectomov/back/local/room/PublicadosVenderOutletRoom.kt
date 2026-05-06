@@ -6,9 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
-/**
- * Lista local de envíos realizados desde Vender tras respuesta OK de la API.
- */
 class PublicadosVenderOutletRoom(
     application: Application,
 ) {

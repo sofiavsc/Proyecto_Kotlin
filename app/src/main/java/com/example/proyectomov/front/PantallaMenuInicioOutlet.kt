@@ -1,5 +1,12 @@
 package com.example.proyectomov.front
 
+import android.widget.Toast
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,6 +41,8 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -44,6 +53,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -111,9 +121,15 @@ internal inline fun <reified T : Any> navegarTabInferior(
     }
 }
 
-/**
- * Cada palabra debe aparecer en título o categoría (sin distinguir mayúsculas).
- */
+/** Desde la pantalla Bolsa, ir a Explorar: quitar el carrito del back stack de forma explícita (evita quedarse en Bolsa con rutas type-safe). */
+internal fun navegarAInicioDesdeCarrito(navController: NavHostController) {
+    navController.navigate(RutaMenuInicioOutlet) {
+        popUpTo(RutaCarritoOutlet) { inclusive = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
 private fun articulosFiltradosBusqueda(
     articulos: List<ArticuloOutlet>,
     consultaTrimada: String,
@@ -137,10 +153,17 @@ private fun articulosFiltradosCategorias(
     }
 }
 
-/** Misma convención que [com.example.proyectomov.back.ProductosRepository]: id api → idMostrar con ceros. */
 private fun articuloPorProductId(articulos: List<ArticuloOutlet>, productId: Int): ArticuloOutlet? {
     val idMostrar = productId.toString().padStart(3, '0')
     return articulos.find { it.idMostrar == idMostrar }
+}
+
+private fun totalCarritoPesosEntero(
+    articulos: List<ArticuloOutlet>,
+    lineas: List<ItemCarritoOutlet>,
+): Int = lineas.sumOf { linea ->
+    val art = articuloPorProductId(articulos, linea.productId)
+    (art?.precioPesosEntero ?: 0) * linea.cantidad
 }
 
 @Composable
@@ -757,22 +780,68 @@ fun PantallaCarritoOutlet(
         carritoViewModel.sincronizarCarritoUsuario()
     }
 
+    val contexto = LocalContext.current
     val carrito = carritoViewModel.carritoActivo
     val cargando = carritoViewModel.cargando
     val lineas = carrito?.productos.orEmpty()
     val errorMsg = carritoViewModel.error
+    val totalPesos = totalCarritoPesosEntero(articulos, lineas)
+    val montoTotalTexto = "$${totalPesos}.00"
 
     Scaffold(
         containerColor = Color.White,
         bottomBar = {
-            BarraNavegacionInferiorOutlet(
-                tabSeleccionada = TabBarraOutlet.Bolsa,
-                onExplorar = { navegarTabInferior(navController, RutaMenuInicioOutlet) },
-                onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
-                onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
-                onBolsa = { },
-                onPerfil = { navegarTabInferior(navController, RutaPerfilOutlet) },
-            )
+            Column(modifier = Modifier.background(Color.White)) {
+                AnimatedVisibility(
+                    visible = !cargando && lineas.isNotEmpty(),
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Button(
+                                onClick = {
+                                    carritoViewModel.finalizarCompraLocal()
+                                    Toast.makeText(
+                                        contexto,
+                                        contexto.getString(R.string.msg_purchase_success),
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                },
+                                modifier = Modifier.height(48.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = OlivaVintage),
+                                shape = RoundedCornerShape(50),
+                            ) {
+                                Text(
+                                    stringResource(R.string.cart_buy),
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                            }
+                            Text(
+                                text = stringResource(R.string.cart_total_format, montoTotalTexto),
+                                color = OlivaVintage,
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                        }
+                        HorizontalDivider(color = GrisBordeCampo)
+                    }
+                }
+                BarraNavegacionInferiorOutlet(
+                    tabSeleccionada = TabBarraOutlet.Bolsa,
+                    onExplorar = { navegarAInicioDesdeCarrito(navController) },
+                    onDeseos = { navegarTabInferior(navController, RutaFavoritosOutlet) },
+                    onVender = { navController.navigate(RutaAgregarArticuloOutlet) },
+                    onBolsa = { },
+                    onPerfil = { navegarTabInferior(navController, RutaPerfilOutlet) },
+                )
+            }
         },
     ) { padding ->
         Box(

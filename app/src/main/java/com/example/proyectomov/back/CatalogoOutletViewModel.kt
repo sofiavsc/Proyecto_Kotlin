@@ -112,10 +112,6 @@ class CatalogoOutletViewModel(
         }
     }
 
-    /**
-     * Crea el artículo en la API y lo antepone a [articulos] para que aparezca en el catálogo local
-     * (Fake Store no siempre devuelve el ítem nuevo en GET /products).
-     */
     fun publicarArticulo(
         titulo: String,
         precio: Double,
@@ -160,9 +156,6 @@ class CatalogoOutletViewModel(
         }
     }
 
-    /**
-     * Publicaciones locales desde «Vender» primero; el resto sin duplicar por [ArticuloOutlet.idMostrar].
-     */
     private fun combinarPublicadosVenderConCatalogo(
         publicadosUsuario: List<ArticuloOutlet>,
         catalogoResto: List<ArticuloOutlet>,

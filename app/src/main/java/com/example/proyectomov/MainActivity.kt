@@ -29,8 +29,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 .build()
         }
-        // Edge-to-edge + HWUI/JankTracker en algunos emuladores (API ≤33) pueden provocar asserts
-        // "Impossible totalDuration 0" en el RenderThread; en API 34+ el marco suele comportarse mejor.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             enableEdgeToEdge()
         }

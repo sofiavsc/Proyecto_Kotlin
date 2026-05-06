@@ -4,10 +4,6 @@ import android.content.res.Resources
 import com.example.proyectomov.R
 import java.util.Locale
 
-/**
- * Convierte el slug de categoría de Fake Store API a texto mostrable según recursos (es/en).
- * El valor original en inglés se mantiene en el modelo para filtros y navegación.
- */
 object MapeoCategoriaApi {
 
     fun etiquetaMostrar(resources: Resources, slugApi: String): String {

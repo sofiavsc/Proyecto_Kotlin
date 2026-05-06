@@ -8,9 +8,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
 
-/**
- * Traducción EN → ES para textos de productos de la API (Fake Store).
- */
 class TraductorTextoApi {
 
     private val translator: Translator = Translation.getClient(

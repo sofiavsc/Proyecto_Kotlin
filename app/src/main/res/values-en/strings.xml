@@ -144,6 +144,9 @@
     <string name="cart_err_create">Could not create cart.</string>
     <string name="cart_err_update">Could not update cart.</string>
     <string name="cart_err_remove">Could not remove item.</string>
+    <string name="cart_buy">BUY</string>
+    <string name="cart_total_format">Total: %1$s</string>
+    <string name="msg_purchase_success">Purchase successful.</string>
 
     <string name="repo_err_username_empty">Enter a username.</string>
     <string name="repo_err_email_invalid">Invalid email.</string>

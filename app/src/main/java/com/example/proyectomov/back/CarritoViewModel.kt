@@ -32,7 +32,6 @@ class CarritoViewModel(
     var error by mutableStateOf("")
         private set
 
-    /** Carrito creado en esta sesión; no se reutilizan carritos demo de GET /carts/user/1. */
     private var idCarritoSesion: Int? = null
 
     companion object {
@@ -46,14 +45,11 @@ class CarritoViewModel(
         viewModelScope.launch {
             cargando = true
             error = ""
-            // FakeStore no garantiza persistencia real para GET /carts/{id};
-            // mantenemos el carrito de la sesión local para evitar errores por body nulo.
             cargando = false
             alTerminar?.invoke()
         }
     }
 
-    /** Cada producto aparece como una línea con cantidad 1 (API); no duplicar líneas al volver a añadir. */
     fun agregarProducto(productId: Int, alResultado: (exito: Boolean, mensaje: String) -> Unit) {
         viewModelScope.launch {
             operando = true
@@ -86,7 +82,6 @@ class CarritoViewModel(
 
             val base = carritoActivo
             if (base == null || base.id != idSesion) {
-                // Si se perdió el estado local de sesión, creamos un nuevo carrito de sesión.
                 idCarritoSesion = null
                 carritoActivo = null
                 operando = false
@@ -149,5 +144,12 @@ class CarritoViewModel(
                 },
             )
         }
+    }
+
+    /** Vacía el carrito solo en memoria (no persiste en el dispositivo). */
+    fun finalizarCompraLocal() {
+        idCarritoSesion = null
+        carritoActivo = null
+        error = ""
     }
 }

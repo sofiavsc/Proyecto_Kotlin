@@ -7,10 +7,6 @@ import com.example.proyectomov.back.api.ProductUpsertDto
 class ProductosRepository(
     private val api: FakeStoreApiService,
 ) {
-    /**
-     * Une lista general (con [limit] alto) + productos por cada categoría y elimina duplicados por id.
-     * Así el catálogo refleja todo lo que la API expone, no solo los ~20 del GET /products por defecto.
-     */
     suspend fun obtenerCatalogoCompletoUnificado(): Result<List<ArticuloOutlet>> = runCatching {
         val porId = linkedMapOf<String, ArticuloOutlet>()
 

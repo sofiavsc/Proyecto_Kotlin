@@ -3,9 +3,6 @@ package com.example.proyectomov.back.local.room
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-/**
- * Artículos publicados desde la pantalla «Vender» (persistidos en Room).
- */
 @Entity(tableName = "productos_publicados_vender")
 data class ProductoPublicadoVenderOutletEntity(
     @PrimaryKey val idLocal: String,

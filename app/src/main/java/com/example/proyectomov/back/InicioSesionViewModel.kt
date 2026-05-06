@@ -9,9 +9,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-/**
- * Validación contra cuentas guardadas en DataStore.
- */
 class InicioSesionViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
@@ -25,7 +22,6 @@ class InicioSesionViewModel(
     var tokenSesion by mutableStateOf("")
         private set
 
-    /** Usuario tras login correcto (id local estable). */
     var usuarioSesionId by mutableStateOf<Int?>(null)
         private set
 
